@@ -193,3 +193,7 @@ it('should cancel login task', () => {
 
 ### Q: I know a better way.
 **A**: Awesome, please show us!
+
+## License
+
+  [MIT](LICENSE.txt)
