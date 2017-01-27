@@ -1,8 +1,12 @@
 'use strict'
 const deepEqual = require('deep-equal')
 
-const isPut = obj => (obj && Object.keys(obj).includes('PUT'))
-const isNestedArray = arr => (
+
+const bool = o => !!o
+
+const isPut = obj => bool(obj && Object.keys(obj).includes('PUT'))
+
+const isNestedArray = arr => bool(
   arr &&
   arr.every && // Is an array
   arr.every(subArr => subArr.length === 2) // Every array inside has exactly 2 elements.
