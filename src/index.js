@@ -1,3 +1,4 @@
+'use strict'
 const deepEqual = require('deep-equal')
 
 const isPut = obj => (obj && Object.keys(obj).includes('PUT'))

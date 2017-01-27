@@ -1,3 +1,5 @@
+'use strict'
+
 const { select, call, put } = require('redux-saga/effects')
 // ------------ Example ------------
 
