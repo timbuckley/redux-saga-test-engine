@@ -38,7 +38,7 @@ function getNextVal(searchVal, mapping) {
   return (mapping.find(keyVal => deepEqual(keyVal[0], searchVal)) || [])[1]
 }
 
-function runGenfunc(genFunc, envMapping, ...initialArgs) {
+function sagaTestEngine(genFunc, envMapping, ...initialArgs) {
   assert(
     isGeneratorFunction(genFunc),
     'The first parameter must be a generator function.')
@@ -78,4 +78,4 @@ function runGenfunc(genFunc, envMapping, ...initialArgs) {
   return puts
 }
 
-module.exports = { runGenfunc, isPut, isNestedArray, getNextVal, assert }
+module.exports = { sagaTestEngine, isPut, isNestedArray, getNextVal, assert }

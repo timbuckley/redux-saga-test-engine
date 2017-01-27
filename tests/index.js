@@ -2,7 +2,7 @@
 
 const test = require('ava')
 const {
-  runGenfunc,
+  sagaTestEngine,
   isPut,
   isNestedArray,
 } = require('../src')
@@ -47,32 +47,32 @@ test('isNestedArray correctly identifies a nested array', t => {
 })
 
 
-test('runGenfunc throws under bad conditions', t => {
+test('sagaTestEngine throws under bad conditions', t => {
   const genericGenFunc = function*() {}
   const generator = genericGenFunc()
 
   // First assert.
   t.throws(
-    () => runGenfunc(),
+    () => sagaTestEngine(),
     'The first parameter must be a generator function.')
   t.throws(
-    () => runGenfunc(1),
+    () => sagaTestEngine(1),
     'The first parameter must be a generator function.')
   t.throws(
-    () => runGenfunc(() => 1),
+    () => sagaTestEngine(() => 1),
     'The first parameter must be a generator function.',
     'Handled non-generator functions')
   t.throws(
-    () => runGenfunc(generator),
+    () => sagaTestEngine(generator),
     'The first parameter must be a generator function.',
     'Cannot be a generator itself')
 
   // Second assert.
   t.throws(
-    () => runGenfunc(genericGenFunc, 1),
+    () => sagaTestEngine(genericGenFunc, 1),
     'The second parameter must be a nested array.')
   t.throws(
-    () => runGenfunc(genericGenFunc, [1]),
+    () => sagaTestEngine(genericGenFunc, [1]),
     'The second parameter must be a nested array.')
 
   // Third assert.
@@ -81,25 +81,25 @@ test('runGenfunc throws under bad conditions', t => {
   }
   const badMapping = [['incorrect key', 'value']]
   t.throws(
-    () => runGenfunc(f, badMapping),
+    () => sagaTestEngine(f, badMapping),
     'Env Mapping is missing a value for "key"')
 
   // No errors thrown
   const goodMapping = [['key', 'value']]
-  t.notThrows(() => runGenfunc(f, goodMapping))
+  t.notThrows(() => sagaTestEngine(f, goodMapping))
 
   const f2 = function*() {
     yield 'key1'
     yield 'key2'
   }
   const goodMapping2 = [['key1', 'value1'], ['key2', 'value2']]
-  t.notThrows(() => runGenfunc(f2, goodMapping2))
+  t.notThrows(() => sagaTestEngine(f2, goodMapping2))
 
   const f3 = function*() {
     yield undefined
   }
   const goodMapping3 = [[undefined, undefined]]
-  t.notThrows(() => runGenfunc(f3, goodMapping3))
+  t.notThrows(() => sagaTestEngine(f3, goodMapping3))
 
 })
 
@@ -124,7 +124,7 @@ test('Example favSagaWorker with happy path works', t => {
   ]
 
   t.deepEqual(
-    runGenfunc(favSagaWorker, ENV, FAV_ACTION),
+    sagaTestEngine(favSagaWorker, ENV, FAV_ACTION),
     [put(sucessfulFavItemAction(favItemResp, itemId, user))],
     'Happy path'
   )
@@ -151,7 +151,7 @@ test('Example favSagaWorker with sad path works', t => {
   ]
 
   t.deepEqual(
-    runGenfunc(favSagaWorker, ENV, FAV_ACTION),
+    sagaTestEngine(favSagaWorker, ENV, FAV_ACTION),
     [put(receivedFavItemErrorAction(favItemRespFail, itemId))],
     'Not happy path'
   )
