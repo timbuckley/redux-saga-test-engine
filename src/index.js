@@ -12,9 +12,28 @@ const isNestedArray = arr => bool(
   arr.every(subArr => subArr.length === 2) // Every array inside has exactly 2 elements.
 )
 
-const prettyPrint = (obj, msg) => console.log(msg || '', JSON.stringify(obj, null, 2))
+// Lifted from https://github.com/tj/co/blob/717b043371ba057cb7a4a2a4e47120d598116ed7/index.js#L221
+function isGeneratorFunction(obj) {
+  const { constructor } = (obj || {})
+  if (!constructor) return false
+  if (
+    'GeneratorFunction' === constructor.name ||
+    'GeneratorFunction' === constructor.displayName
+  ) {
+    return true
+  }
+  return false
+}
 
+function assert(condition, message) {
+  if (!condition) {
+    if (typeof Error !== 'undefined') {
+      throw new Error(message || 'Assertion failed')
+    }
+  }
+}
 
+// Returns value in mapping corresponding to matching searchVal key.
 function getNextVal(searchVal, mapping) {
   return (mapping.find(keyVal => deepEqual(keyVal[0], searchVal)) || [])[1]
 }
@@ -55,4 +74,4 @@ function runGenfunc(genFunc, envMapping, ...initialArgs) {
   return puts
 }
 
-module.exports = { runGenfunc, isPut, isNestedArray, getNextVal, prettyPrint }
+module.exports = { runGenfunc, isPut, isNestedArray, getNextVal, assert }
