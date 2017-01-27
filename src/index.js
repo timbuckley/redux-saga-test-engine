@@ -39,30 +39,33 @@ function getNextVal(searchVal, mapping) {
 }
 
 function runGenfunc(genFunc, envMapping, ...initialArgs) {
-  if (typeof genFunc !== 'function') {
-    console.error(`The first parameter must be a generator function.`)
-  }
-
-  if (!isNestedArray(envMapping)) {
-    console.error(`The second parameter must be a nested array.`)
-  }
+  assert(
+    isGeneratorFunction(genFunc),
+    'The first parameter must be a generator function.')
+  assert(
+    isNestedArray(envMapping),
+    'The second parameter must be a nested array.')
 
   const mapping = [...envMapping, [undefined, undefined]]
   const gen = genFunc(...initialArgs)
-  let val, genResult, nextVal
+  let val = undefined
   let puts = []
   let isDone = false
+  let counter = 0
 
   while (!isDone) {
-    nextVal = getNextVal(val, mapping)
+    const nextVal = getNextVal(val, mapping)
 
-    // TODO: Should warn the user if yielded value is not found in the `mapping`.
-    // if (nextVal === undefined) {
-    //   console.warn(`
-    //     Either the yielded value is not found in your Map, or`)
-    // }
+    // Yielded value must appear in mapping, or be a PUT Effect.
+    const isFirstLoop = counter === 0
+    const nextValFound = nextVal !== undefined
+    const yieldedUndefined = val === undefined
+    const yieldedEffectIsPut = isPut(val)
+    assert(
+      (isFirstLoop || nextValFound || yieldedUndefined || yieldedEffectIsPut),
+      `Env Mapping is missing a value for ${JSON.stringify(val, null, 2)}`)
 
-    genResult = gen.next(nextVal)
+    const genResult = gen.next(nextVal)
 
     val = genResult.value
     isDone = genResult.done
@@ -70,6 +73,7 @@ function runGenfunc(genFunc, envMapping, ...initialArgs) {
     if (isPut(val)) {
       puts.push(val)
     }
+    counter++
   }
   return puts
 }
