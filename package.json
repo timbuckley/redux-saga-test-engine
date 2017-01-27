@@ -1,7 +1,7 @@
 {
   "name": "redux-saga-test-engine",
   "version": "1.0.0",
-  "description": "",
+  "description": "Redux saga test helper",
   "main": "index.js",
   "repository": "DNAinfo/redux-saga-test-engine",
   "scripts": {
