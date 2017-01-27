@@ -1,23 +1,24 @@
 {
   "name": "redux-saga-test-engine",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "repository": "DNAinfo/redux-saga-test-engine",
   "scripts": {
     "start": "npm install",
     "test": "ava tests/",
     "lint": "eslint ./"
   },
   "keywords": ["redux", "redux-saga", "test"],
-  "author": "Tim Buckley",
-  "license": "ISC",
+  "author": "DNAinfo",
+  "license": "MIT",
   "dependencies": {
-    "deep-equal": "^1.0.1",
-    "redux-saga": "^0.14.1"
+    "deep-equal": "^1.0.1"
   },
   "devDependencies": {
     "ava": "^0.17.0",
     "babel-eslint": "^7.1.1",
-    "eslint": "^3.13.0"
+    "eslint": "^3.13.0",
+    "redux-saga": "^0.14.1"
   }
 }
