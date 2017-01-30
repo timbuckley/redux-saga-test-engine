@@ -10,6 +10,9 @@
     "test:watch": "npm test -- --watch",
     "lint": "eslint ./"
   },
+  "engine": {
+    "node": ">=6.0.0"
+  },
   "keywords": ["redux", "redux-saga", "test"],
   "author": "DNAinfo",
   "license": "MIT",
