@@ -5,6 +5,7 @@ const {
   sagaTestEngine,
   isPut,
   isNestedArray,
+  getNextVal,
 } = require('../src')
 const {
   favSagaWorker,
@@ -44,6 +45,25 @@ test('isNestedArray correctly identifies a nested array', t => {
   t.true(isNestedArray([['key', 'val']]))
   t.true(isNestedArray([['key', 'val']]))
   t.true(isNestedArray([[undefined, undefined]]))
+})
+
+
+test('getNextVal', t => {
+  t.is(2, getNextVal(1, [[1, 2]]))
+  t.is(2, getNextVal(1, [[1, 2], [1, 3]]))
+  t.is(
+    'val',
+    getNextVal(
+      {a: {b: {c: 1}}},
+      [
+        [{a: {b: {c: 1}}}, 'val']
+      ]
+    ),
+    'Handled deeply-nested objects'
+  )
+  t.is(undefined, getNextVal(100, []))
+  t.is(undefined, getNextVal(100, [[1, 2]]))
+  t.is(undefined, getNextVal(undefined, []))
 })
 
 
