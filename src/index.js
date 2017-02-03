@@ -77,7 +77,7 @@ function sagaTestEngine(genFunc, envMapping, ...initialArgs) {
     val = genResult.value
     isDone = genResult.done
 
-    if (isPut(val)) {
+    if (isPut(val) || isNestedPut(val)) {
       puts.push(val)
     }
     counter++

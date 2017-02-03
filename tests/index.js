@@ -139,6 +139,37 @@ test('sagaTestEngine throws under bad conditions', t => {
 })
 
 
+test('sagaTestEngine correctly handles array of PUTS', t => {
+  const selectorFunc = () => 2
+  function* sagaWithNestedPuts() {
+    const someString = yield select(selectorFunc)
+    yield [
+      put({a: 1}),
+      put({b: 2}),
+      put({c: someString}),
+    ]
+    yield put('another put')
+  }
+
+  const envMapping = [
+    [select(selectorFunc), 'someString']
+  ]
+
+  t.deepEqual(
+    sagaTestEngine(sagaWithNestedPuts, envMapping),
+    [
+      [
+        put({a: 1}),
+        put({b: 2}),
+        put({c: 'someString'}),
+      ],
+      put('another put'),
+    ],
+    'Result is a nested array of puts.'
+  )
+})
+
+
 test('Example favSagaWorker with happy path works', t => {
   const itemId = '123'
   const token = '456'
