@@ -124,6 +124,18 @@ test('sagaTestEngine throws under bad conditions', t => {
   const goodMapping3 = [[undefined, undefined]]
   t.notThrows(() => sagaTestEngine(f3, goodMapping3))
 
+  const f4 = function*() {
+    yield [put({a: 1})]
+  }
+  t.notThrows(
+    () => sagaTestEngine(f4, goodMapping3),
+    'Correctly handles nested array of puts'
+  )
+
+  const f5 = function*() {
+    yield [select(() => 1)]
+  }
+  t.throws(() => sagaTestEngine(f5, goodMapping3))
 })
 
 
