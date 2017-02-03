@@ -1,6 +1,6 @@
 {
   "name": "redux-saga-test-engine",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Redux saga test helper",
   "engines": {
     "node": ">=6.0.0"
