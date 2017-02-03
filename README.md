@@ -1,4 +1,5 @@
 # Redux Saga Test Engine
+![Circle CI Status Shield](https://circleci.com/gh/DNAinfo/redux-saga-test-engine.png?style=shield&circle-token=2aa98ed43cdd0fcf890f955d7e203e663edba01c)
 
 Test your `redux-saga` generator functions with less pain.
 
