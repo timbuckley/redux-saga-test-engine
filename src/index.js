@@ -6,6 +6,13 @@ const bool = o => !!o
 
 const isPut = obj => bool(obj && Object.keys(obj).includes('PUT'))
 
+const isNestedPut = arr => bool(
+  arr &&
+  arr.every &&
+  arr.length > 0 &&
+  arr.every(element => isPut(element))
+)
+
 const isNestedArray = arr => bool(
   arr &&
   arr.every && // Is an array
@@ -60,7 +67,7 @@ function sagaTestEngine(genFunc, envMapping, ...initialArgs) {
     const isFirstLoop = counter === 0
     const nextValFound = nextVal !== undefined
     const yieldedUndefined = val === undefined
-    const yieldedEffectIsPut = isPut(val)
+    const yieldedEffectIsPut = isPut(val) || isNestedPut(val)
     assert(
       (isFirstLoop || nextValFound || yieldedUndefined || yieldedEffectIsPut),
       `Env Mapping is missing a value for ${JSON.stringify(val, null, 2)}`)
@@ -78,4 +85,4 @@ function sagaTestEngine(genFunc, envMapping, ...initialArgs) {
   return puts
 }
 
-module.exports = { sagaTestEngine, isPut, isNestedArray, getNextVal, assert }
+module.exports = { sagaTestEngine, isPut, isNestedPut, isNestedArray, getNextVal, assert }
