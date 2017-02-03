@@ -6,19 +6,25 @@
   "repository": "DNAinfo/redux-saga-test-engine",
   "scripts": {
     "start": "npm install",
-    "test": "ava tests/",
+    "test": "babel-tape-runner tests/index.js | faucet",
     "lint": "eslint ./"
   },
-  "keywords": ["redux", "redux-saga", "test"],
+  "keywords": [
+    "redux",
+    "redux-saga",
+    "test"
+  ],
   "author": "DNAinfo",
   "license": "MIT",
   "dependencies": {
     "deep-equal": "^1.0.1"
   },
   "devDependencies": {
-    "ava": "^0.17.0",
     "babel-eslint": "^7.1.1",
+    "babel-tape-runner": "^2.0.1",
     "eslint": "^3.13.0",
-    "redux-saga": "^0.14.1"
+    "faucet": "0.0.1",
+    "redux-saga": "^0.14.1",
+    "tape": "^4.6.3"
   }
 }

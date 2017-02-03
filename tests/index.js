@@ -1,6 +1,6 @@
 'use strict'
 
-const test = require('ava')
+const test = require('tape')
 const {
   sagaTestEngine,
   isPut,
@@ -28,6 +28,7 @@ test('isPut correctly identifies a PUT Saga Effect', t => {
 
   t.true(isPut(put({})))
   t.true(isPut({PUT: 'someting'}))
+  t.end()
 })
 
 
@@ -44,6 +45,7 @@ test('isNestedArray correctly identifies a nested array', t => {
   t.true(isNestedArray([['key', 'val']]))
   t.true(isNestedArray([['key', 'val']]))
   t.true(isNestedArray([[undefined, undefined]]))
+  t.end()
 })
 
 
@@ -86,21 +88,21 @@ test('sagaTestEngine throws under bad conditions', t => {
 
   // No errors thrown
   const goodMapping = [['key', 'value']]
-  t.notThrows(() => sagaTestEngine(f, goodMapping))
+  t.doesNotThrow(() => sagaTestEngine(f, goodMapping))
 
   const f2 = function*() {
     yield 'key1'
     yield 'key2'
   }
   const goodMapping2 = [['key1', 'value1'], ['key2', 'value2']]
-  t.notThrows(() => sagaTestEngine(f2, goodMapping2))
+  t.doesNotThrow(() => sagaTestEngine(f2, goodMapping2))
 
   const f3 = function*() {
     yield undefined
   }
   const goodMapping3 = [[undefined, undefined]]
-  t.notThrows(() => sagaTestEngine(f3, goodMapping3))
-
+  t.doesNotThrow(() => sagaTestEngine(f3, goodMapping3))
+  t.end()
 })
 
 
@@ -128,6 +130,7 @@ test('Example favSagaWorker with happy path works', t => {
     [put(sucessfulFavItemAction(favItemResp, itemId, user))],
     'Happy path'
   )
+  t.end()
 })
 
 
@@ -155,4 +158,5 @@ test('Example favSagaWorker with sad path works', t => {
     [put(receivedFavItemErrorAction(favItemRespFail, itemId))],
     'Not happy path'
   )
+  t.end()
 })
