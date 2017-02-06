@@ -284,3 +284,30 @@ test('Example favSagaWorker with sad path works', t => {
     'Not happy path'
   )
 })
+
+
+test('favSagaWorker works when given a Map', t => {
+  const itemId = '123'
+  const token = '456'
+  const user = {id: '321'}
+
+  const favItemResp = 'The favItem JSON response'
+  const favItemRespOBj = { json: () => favItemResp }
+
+  const FAV_ACTION = {
+    type: 'FAV_ITEM_REQUESTED',
+    payload: { itemId },
+  }
+
+  const ENV = new Map([
+    [select(getGlobalState), { user, token }],
+    [call(favItem, itemId, token), favItemRespOBj],
+    [favItemResp, favItemResp]
+  ])
+
+  t.deepEqual(
+    sagaTestEngine(favSagaWorker, ENV, FAV_ACTION),
+    [put(sucessfulFavItemAction(favItemResp, itemId, user))],
+    'Maps work'
+  )
+})
