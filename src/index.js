@@ -60,8 +60,8 @@ function sagaTestEngine(genFunc, envMapping, ...initialArgs) {
     isGeneratorFunction(genFunc),
     'The first parameter must be a generator function.')
   assert(
-    isNestedArray(envMapping),
-    'The second parameter must be a nested array.')
+    isMap(envMapping) || isNestedArray(envMapping),
+    'The second parameter must be a nested array or Map.')
 
   const mapping = [...envMapping, [undefined, undefined]]
   const gen = genFunc(...initialArgs)
