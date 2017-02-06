@@ -68,7 +68,7 @@ function* favSagaWorker(action) {
 ```js
 // favSaga.spec.js
 const test = require('ava')
-const runGenfunc = require('redux-saga-test-engine')
+const sagaTestEngine = require('redux-saga-test-engine')
 const {
   favSagaWorker,
   getGlobalState,
@@ -98,8 +98,8 @@ test('favSagaWorker', t => {
     [favItemResp, favItemResp]
   ]
 
+  const actual = sagaTestEngine((favSagaWorker), ENV, FAV_ACTION)
   const expected = [put(sucessfulFavItemAction(favItemResp, itemId, user))]
-  const actual = runGenfunc((favSagaWorker), ENV, FAV_ACTION)
 
   t.deepEqual(
     actual,
@@ -124,9 +124,6 @@ Therefore, the arguments to the engine provided is:
 3. Whatever other arguments should initialize the saga worker (optional).
 
 ...and the output is an array of `put(...)` effect objects as they occur.
-
-### Q: Why not use a `Map`?
-**A**: Maps only work if the key is referencing the same object (ie `obj1 === obj2`), even if their values are the same.
 
 ### Q: Why not just use [`redux-saga-test`](https://github.com/stoeffel/redux-saga-test)?
 **A**: Lets see how one uses it:
@@ -203,6 +200,12 @@ it('should cancel login task', () => {
   )
 })
 ```
+
+### Q: Why not use a `Map` for the second argument (the `envMapping`)?
+**A**:
+_**NOTE**: The main `sagaTestEngine` now accepts a `Map` as well as a nested array. But it isn't actually helpful, as described below._
+
+Maps only work if the key is referencing the identical object (ie `a === b`), even if their values are the same (ie `deepEqual(a, b)`). Thus a corresponding `select(...)` value, for example, would not be found merely by using `envMap.get(select(...))`. Instead, the keys must be traversed though - and so it's no more helpful to use a Map than a simple nested Array.
 
 ### Q: I know a better way.
 **A**: Awesome, please show us!
