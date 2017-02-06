@@ -3,6 +3,18 @@
 
 Test your `redux-saga` generator functions with less pain.
 
+## Installation
+
+With `npm`:
+```
+npm install redux-saga-test-engine --save-dev
+```
+
+With `yarn`:
+```bash
+yarn add redux-saga-test-engine --dev
+```
+
 ## Usage
 
 ```js
