@@ -63,6 +63,7 @@ test('isNestedArray correctly identifies a nested array', t => {
   t.false(isNestedArray([1, 2]))
   t.false(isNestedArray([[1], [2]]))
   t.false(isNestedArray([[1, 2], [3]]))
+  t.false(isNestedArray(new Map([[1, 2], [3]])))
 
   t.true(isNestedArray([]), 'Empty array is allowed.')
   t.true(isNestedArray([['key', 'val']]))
@@ -72,8 +73,10 @@ test('isNestedArray correctly identifies a nested array', t => {
 
 
 test('getNextVal', t => {
+  // Nested Array
   t.is(2, getNextVal(1, [[1, 2]]))
   t.is(2, getNextVal(1, [[1, 2], [1, 3]]))
+  t.is(4, getNextVal(3, [[1, 2], [3, 4]]))
   t.is(
     'val',
     getNextVal(
@@ -82,11 +85,50 @@ test('getNextVal', t => {
         [{a: {b: {c: 1}}}, 'val']
       ]
     ),
-    'Handled deeply-nested objects'
+    'Handled deeply-nested objects in arrays'
   )
+  t.is(
+    undefined,
+    getNextVal(
+      {a: {b: {c: 2}}},
+      [
+        [{a: {b: {c: 1}}}, 'val']
+      ]
+    ),
+    'Handled deeply-nested objects in arrays part 2'
+  )
+
+  // Map
+  t.is(2, getNextVal(1, new Map([[1, 2]])))
+  t.is(4, getNextVal(3, new Map([[1, 2], [3, 4]])))
+  t.is(
+    'val',
+    getNextVal(
+      {a: {b: {c: 1}}},
+      new Map([
+        [{a: {b: {c: 1}}}, 'val']
+      ])
+    ),
+    'Handled deeply-nested objects in Map'
+  )
+  t.is(
+    undefined,
+    getNextVal(
+      {a: {b: {c: 2}}},
+      new Map([
+        [{a: {b: {c: 1}}}, 'val']
+      ])
+    ),
+    'Handled deeply-nested objects in Map part 2'
+  )
+
+  // Handles value not found.
   t.is(undefined, getNextVal(100, []))
+  t.is(undefined, getNextVal(100, new Map([])))
   t.is(undefined, getNextVal(100, [[1, 2]]))
+  t.is(undefined, getNextVal(100, new Map([[1, 2]])))
   t.is(undefined, getNextVal(undefined, []))
+  t.is(undefined, getNextVal(undefined, new Map([])))
 })
 
 
@@ -113,10 +155,10 @@ test('sagaTestEngine throws under bad conditions', t => {
   // Second assert.
   t.throws(
     () => sagaTestEngine(genericGenFunc, 1),
-    'The second parameter must be a nested array.')
+    'The second parameter must be a nested array or Map.')
   t.throws(
     () => sagaTestEngine(genericGenFunc, [1]),
-    'The second parameter must be a nested array.')
+    'The second parameter must be a nested array or Map.')
 
   // Third assert.
   const f = function*() {
