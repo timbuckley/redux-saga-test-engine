@@ -19,6 +19,8 @@ const isNestedArray = arr => bool(
   arr.every(subArr => subArr.length === 2) // Every array inside has exactly 2 elements.
 )
 
+const isMap = m => bool(Object.prototype.toString.call(m) === '[object Map]')
+
 // Lifted from https://github.com/tj/co/blob/717b043371ba057cb7a4a2a4e47120d598116ed7/index.js#L221
 function isGeneratorFunction(obj) {
   const { constructor } = (obj || {})
@@ -42,7 +44,15 @@ function assert(condition, message) {
 
 // Returns value in mapping corresponding to matching searchVal key.
 function getNextVal(searchVal, mapping) {
-  return (mapping.find(keyVal => deepEqual(keyVal[0], searchVal)) || [])[1]
+  if (isMap(mapping)) {
+    for (let [key, value] of mapping.entries()) {
+      if (deepEqual(key, searchVal)) {
+        return value
+      }
+    }
+  } else {
+    return (mapping.find(keyVal => deepEqual(keyVal[0], searchVal)) || [])[1]
+  }
 }
 
 function sagaTestEngine(genFunc, envMapping, ...initialArgs) {
@@ -50,8 +60,8 @@ function sagaTestEngine(genFunc, envMapping, ...initialArgs) {
     isGeneratorFunction(genFunc),
     'The first parameter must be a generator function.')
   assert(
-    isNestedArray(envMapping),
-    'The second parameter must be a nested array.')
+    isMap(envMapping) || isNestedArray(envMapping),
+    'The second parameter must be a nested array or Map.')
 
   const mapping = [...envMapping, [undefined, undefined]]
   const gen = genFunc(...initialArgs)
