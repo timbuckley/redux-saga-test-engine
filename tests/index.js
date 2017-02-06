@@ -6,6 +6,7 @@ const {
   isPut,
   isNestedArray,
   getNextVal,
+  isNestedPut,
 } = require('../src')
 const {
   favSagaWorker,
@@ -29,6 +30,28 @@ test('isPut correctly identifies a PUT Saga Effect', t => {
 
   t.true(isPut(put({})))
   t.true(isPut({PUT: 'someting'}))
+})
+
+
+test('isNestedPut correctly identifies an array of PUT Saga Effects', t => {
+  t.false(isNestedPut())
+  t.false(isNestedPut({}))
+  t.false(isNestedPut([]))
+  t.false(isNestedPut(put))
+  t.false(isNestedPut(call))
+  t.false(isNestedPut(select))
+  t.false(isNestedPut(call(() => 'call')))
+  t.false(isNestedPut(select(() => 'select')))
+  t.false(isNestedPut({CALL: 'someting'}))
+  t.false(isNestedPut(put({})))
+  t.false(isNestedPut({PUT: 'someting'}))
+
+  t.true(isNestedPut([{PUT: 'someting'}]))
+  t.true(isNestedPut([put({})]))
+  t.true(isNestedPut([put({}), put({}), put({})]))
+
+  t.false(isNestedPut([call(() => 1)]))
+  t.false(isNestedPut([put({}), select(() => 1), put({})]))
 })
 
 
@@ -121,6 +144,49 @@ test('sagaTestEngine throws under bad conditions', t => {
   const goodMapping3 = [[undefined, undefined]]
   t.notThrows(() => sagaTestEngine(f3, goodMapping3))
 
+  const f4 = function*() {
+    yield [put({a: 1})]
+  }
+  t.notThrows(
+    () => sagaTestEngine(f4, goodMapping3),
+    'Correctly handles nested array of puts'
+  )
+
+  const f5 = function*() {
+    yield [select(() => 1)]
+  }
+  t.throws(() => sagaTestEngine(f5, goodMapping3))
+})
+
+
+test('sagaTestEngine correctly handles array of PUTS', t => {
+  const selectorFunc = () => 2
+  function* sagaWithNestedPuts() {
+    const someString = yield select(selectorFunc)
+    yield [
+      put({a: 1}),
+      put({b: 2}),
+      put({c: someString}),
+    ]
+    yield put('another put')
+  }
+
+  const envMapping = [
+    [select(selectorFunc), 'someString']
+  ]
+
+  t.deepEqual(
+    sagaTestEngine(sagaWithNestedPuts, envMapping),
+    [
+      [
+        put({a: 1}),
+        put({b: 2}),
+        put({c: 'someString'}),
+      ],
+      put('another put'),
+    ],
+    'Result is a nested array of puts.'
+  )
 })
 
 
