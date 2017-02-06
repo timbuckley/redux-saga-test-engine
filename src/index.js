@@ -19,6 +19,8 @@ const isNestedArray = arr => bool(
   arr.every(subArr => subArr.length === 2) // Every array inside has exactly 2 elements.
 )
 
+const isMap = m => bool(Object.prototype.toString.call(m) === '[object Map]')
+
 // Lifted from https://github.com/tj/co/blob/717b043371ba057cb7a4a2a4e47120d598116ed7/index.js#L221
 function isGeneratorFunction(obj) {
   const { constructor } = (obj || {})
