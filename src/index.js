@@ -44,7 +44,15 @@ function assert(condition, message) {
 
 // Returns value in mapping corresponding to matching searchVal key.
 function getNextVal(searchVal, mapping) {
-  return (mapping.find(keyVal => deepEqual(keyVal[0], searchVal)) || [])[1]
+  if (isMap(mapping)) {
+    for (let [key, value] of mapping.entries()) {
+      if (deepEqual(key, searchVal)) {
+        return value
+      }
+    }
+  } else {
+    return (mapping.find(keyVal => deepEqual(keyVal[0], searchVal)) || [])[1]
+  }
 }
 
 function sagaTestEngine(genFunc, envMapping, ...initialArgs) {
