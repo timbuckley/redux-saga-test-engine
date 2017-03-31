@@ -13,7 +13,8 @@ const {
   getGlobalState,
   favItem,
   sucessfulFavItemAction,
-  receivedFavItemErrorAction
+  receivedFavItemErrorAction,
+  loadingFavItemAction
 } = require('../sagas')
 const { select, call, put } = require('redux-saga/effects')
 
@@ -309,5 +310,39 @@ test('favSagaWorker works when given a Map', t => {
     sagaTestEngine(favSagaWorker, ENV, FAV_ACTION),
     [put(sucessfulFavItemAction(favItemResp, itemId, user))],
     'Maps work'
+  )
+})
+
+test('sagaTestEngine finds PUTs from yielded saga', t => {
+  function* sagaWithNestedSaga(action) {
+    yield put(loadingFavItemAction(true));
+
+    yield* favSagaWorker(action);
+
+    yield put(loadingFavItemAction(false));
+  };
+
+  const itemId = '123'
+  const token = '456'
+  const user = {id: '321'}
+
+  const favItemResp = 'The favItem JSON response'
+  const favItemRespOBj = { json: () => favItemResp }
+
+  const FAV_ACTION = {
+    type: 'FAV_ITEM_REQUESTED',
+    payload: { itemId },
+  }
+
+  const ENV = [
+    [select(getGlobalState), { user, token }],
+    [call(favItem, itemId, token), favItemRespOBj],
+    [favItemResp, favItemResp]
+  ]
+
+  t.deepEqual(
+    sagaTestEngine(sagaWithNestedSaga, ENV, FAV_ACTION),
+    [put(loadingFavItemAction(true)), put(sucessfulFavItemAction(favItemResp, itemId, user)), put(loadingFavItemAction(false))],
+    'Actions dispatched from nested saga'
   )
 })
