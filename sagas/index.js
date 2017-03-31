@@ -11,6 +11,7 @@ const getGlobalState = () => ({
 const favItem = () => ({})
 const sucessfulFavItemAction = (...args) => args
 const receivedFavItemErrorAction = (...args) => args
+const loadingFavItemAction = (...args) => args
 
 // Example saga to be tested.
 function* favSagaWorker(action) {
@@ -31,5 +32,6 @@ module.exports = {
   getGlobalState,
   favItem,
   sucessfulFavItemAction,
-  receivedFavItemErrorAction
+  receivedFavItemErrorAction,
+  loadingFavItemAction
 }
