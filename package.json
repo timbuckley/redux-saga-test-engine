@@ -23,7 +23,7 @@
     "deep-equal": "^1.0.1"
   },
   "devDependencies": {
-    "ava": "^0.17.0",
+    "ava": "^0.18.2",
     "babel-eslint": "^7.1.1",
     "eslint": "^3.13.0",
     "redux-saga": "^0.14.1"
