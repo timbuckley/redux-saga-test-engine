@@ -33,5 +33,5 @@ module.exports = {
   favItem,
   sucessfulFavItemAction,
   receivedFavItemErrorAction,
-  loadingFavItemAction
+  loadingFavItemAction,
 }

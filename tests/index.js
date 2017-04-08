@@ -315,12 +315,12 @@ test('favSagaWorker works when given a Map', t => {
 
 test('sagaTestEngine finds PUTs from yielded saga', t => {
   function* sagaWithNestedSaga(action) {
-    yield put(loadingFavItemAction(true));
+    yield put(loadingFavItemAction(true))
 
-    yield* favSagaWorker(action);
+    yield* favSagaWorker(action)
 
-    yield put(loadingFavItemAction(false));
-  };
+    yield put(loadingFavItemAction(false))
+  }
 
   const itemId = '123'
   const token = '456'
@@ -337,12 +337,16 @@ test('sagaTestEngine finds PUTs from yielded saga', t => {
   const ENV = [
     [select(getGlobalState), { user, token }],
     [call(favItem, itemId, token), favItemRespOBj],
-    [favItemResp, favItemResp]
+    [favItemResp, favItemResp],
   ]
 
   t.deepEqual(
     sagaTestEngine(sagaWithNestedSaga, ENV, FAV_ACTION),
-    [put(loadingFavItemAction(true)), put(sucessfulFavItemAction(favItemResp, itemId, user)), put(loadingFavItemAction(false))],
+    [
+      put(loadingFavItemAction(true)),
+      put(sucessfulFavItemAction(favItemResp, itemId, user)),
+      put(loadingFavItemAction(false)),
+    ],
     'Actions dispatched from nested saga'
   )
 })
