@@ -55,6 +55,20 @@ function getNextVal(searchVal, mapping) {
   }
 }
 
+// Used to stringify yielded values. Output includes functions
+function stringifyVal(val) {
+  return JSON.stringify(val, (key, val) => {
+    if (typeof val === 'function') {
+      if (val.name) {
+        return `[Function: ${val.name}]: ${val.toString()}`;
+      } else {
+        return `[Function]: ${val.toString()}`;
+      }
+    }
+    return val;
+  }, 2);
+}
+
 function sagaTestEngine(genFunc, envMapping, ...initialArgs) {
   assert(
     isGeneratorFunction(genFunc),
@@ -80,7 +94,7 @@ function sagaTestEngine(genFunc, envMapping, ...initialArgs) {
     const yieldedEffectIsPut = isPut(val) || isNestedPut(val)
     assert(
       (isFirstLoop || nextValFound || yieldedUndefined || yieldedEffectIsPut),
-      `Env Mapping is missing a value for ${JSON.stringify(val, null, 2)}`)
+      `Env Mapping is missing a value for ${stringifyVal(val)}`)
 
     const genResult = gen.next(nextVal)
 

@@ -170,35 +170,60 @@ test('sagaTestEngine throws under bad conditions', t => {
     () => sagaTestEngine(f, badMapping),
     'Env Mapping is missing a value for "key"')
 
+  // Bad mapping for saga that yields obj with anonymous function
+  function namedFunction() {}
+  const f2 = function*() {
+    yield { func: namedFunction }
+  }
+  const badMapping2 = [['bad', 'mapping']]
+  t.throws(
+    () => sagaTestEngine(f2, badMapping2),
+    `Env Mapping is missing a value for ${JSON.stringify({ "func": `[Function: namedFunction]: ${namedFunction.toString()}` }, null, 2)}`
+  )
+
+  // Bad mapping for saga that yields object with anonymous function
+  var anonymousFunction = function() { return 'something'; }
+  // Skip the anonymous function test if this anonymous functon is named (done in newer node versions)
+  if (!anonymousFunction.name) {
+    const f3 = function*() {
+      yield { func: anonymousFunction }
+    }
+    const badMapping3 = [['bad', 'mapping']]
+    t.throws(
+      () => sagaTestEngine(f3, badMapping3),
+      `Env Mapping is missing a value for ${JSON.stringify({ func: `[Function]: ${anonymousFunction.toString()}` }, null, 2)}`
+    )
+  }
+
   // No errors thrown
   const goodMapping = [['key', 'value']]
   t.notThrows(() => sagaTestEngine(f, goodMapping))
 
-  const f2 = function*() {
+  const f4 = function*() {
     yield 'key1'
     yield 'key2'
   }
   const goodMapping2 = [['key1', 'value1'], ['key2', 'value2']]
-  t.notThrows(() => sagaTestEngine(f2, goodMapping2))
+  t.notThrows(() => sagaTestEngine(f4, goodMapping2))
 
-  const f3 = function*() {
+  const f5 = function*() {
     yield undefined
   }
   const goodMapping3 = [[undefined, undefined]]
-  t.notThrows(() => sagaTestEngine(f3, goodMapping3))
+  t.notThrows(() => sagaTestEngine(f5, goodMapping3))
 
-  const f4 = function*() {
+  const f6 = function*() {
     yield [put({a: 1})]
   }
   t.notThrows(
-    () => sagaTestEngine(f4, goodMapping3),
+    () => sagaTestEngine(f6, goodMapping3),
     'Correctly handles nested array of puts'
   )
 
-  const f5 = function*() {
+  const f7 = function*() {
     yield [select(() => 1)]
   }
-  t.throws(() => sagaTestEngine(f5, goodMapping3))
+  t.throws(() => sagaTestEngine(f7, goodMapping3))
 })
 
 
