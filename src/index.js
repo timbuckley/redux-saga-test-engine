@@ -50,6 +50,7 @@ function getNextVal(searchVal, mapping) {
         return value
       }
     }
+    return undefined
   } else {
     return (mapping.find(keyVal => deepEqual(keyVal[0], searchVal)) || [])[1]
   }
@@ -60,13 +61,13 @@ function stringifyVal(val) {
   return JSON.stringify(val, (key, val) => {
     if (typeof val === 'function') {
       if (val.name) {
-        return `[Function: ${val.name}]: ${val.toString()}`;
+        return `[Function: ${val.name}]: ${val.toString()}`
       } else {
-        return `[Function]: ${val.toString()}`;
+        return `[Function]: ${val.toString()}`
       }
     }
-    return val;
-  }, 2);
+    return val
+  }, 2)
 }
 
 function sagaTestEngine(genFunc, envMapping, ...initialArgs) {
@@ -109,4 +110,12 @@ function sagaTestEngine(genFunc, envMapping, ...initialArgs) {
   return puts
 }
 
-module.exports = { sagaTestEngine, isPut, isNestedPut, isNestedArray, getNextVal, assert }
+module.exports = {
+  sagaTestEngine,
+  isPut,
+  isNestedPut,
+  isNestedArray,
+  getNextVal,
+  assert,
+  stringifyVal,
+}

@@ -10,6 +10,7 @@
     "no-console": 1,
     "keyword-spacing": [2],
     "space-before-blocks": [2],
+    "semi": [1, "never"],
     "no-case-declarations": 0,
     "key-spacing": [1, {"mode": "minimum"}],
     "comma-spacing": ["error", { "before": false, "after": true }],

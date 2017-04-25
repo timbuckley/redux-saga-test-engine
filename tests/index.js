@@ -14,7 +14,7 @@ const {
   favItem,
   sucessfulFavItemAction,
   receivedFavItemErrorAction,
-  loadingFavItemAction
+  loadingFavItemAction,
 } = require('../sagas')
 const { select, call, put } = require('redux-saga/effects')
 
@@ -132,7 +132,6 @@ test('getNextVal', t => {
   t.is(undefined, getNextVal(undefined, new Map([])))
 })
 
-
 test('sagaTestEngine throws under bad conditions', t => {
   const genericGenFunc = function*() {}
   const generator = genericGenFunc()
@@ -182,7 +181,7 @@ test('sagaTestEngine throws under bad conditions', t => {
   )
 
   // Bad mapping for saga that yields object with anonymous function
-  var anonymousFunction = function() { return 'something'; }
+  const anonymousFunction = function() { return 'something' }
   // Skip the anonymous function test if this anonymous functon is named (done in newer node versions)
   if (!anonymousFunction.name) {
     const f3 = function*() {
