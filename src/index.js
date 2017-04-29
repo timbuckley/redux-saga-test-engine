@@ -4,14 +4,14 @@ const deepEqual = require('deep-equal')
 
 const bool = o => !!o
 
-const isEffect = (obj, effects) => bool(
+const isEffect = (obj, effects = []) => bool(
   obj &&
   Object.keys(obj).some((key) =>
     effects.indexOf(key) !== -1
   )
 )
 
-const isNestedEffect = (arr, effects) => bool(
+const isNestedEffect = (arr, effects = []) => bool(
   arr &&
   arr.every &&
   arr.length > 0 &&
@@ -75,16 +75,15 @@ function stringifyVal(val) {
   }, 2)
 }
 
-function makeSagaTestEngine(effects = ['PUT']) {
-  return (...args) => _sagaTestEngine(effects, ...args)
-}
+// Creates sagaTestEngine that collects yielded effects specified by the effects argument
+const createSagaTestEngine = (effects = ['PUT']) => (...args) => sagaTestEngine(effects, ...args)
 
-const sagaTestEngine = makeSagaTestEngine(['PUT'])
-const collectCalls = makeSagaTestEngine(['CALL'])
-const collectCallsAndPuts = makeSagaTestEngine(['CALL', 'PUT'])
+const collectPuts = createSagaTestEngine(['PUT'])
+const collectCalls = createSagaTestEngine(['CALL'])
+const collectCallsAndPuts = createSagaTestEngine(['CALL', 'PUT'])
 
 
-function _sagaTestEngine(effects, genFunc, envMapping, ...initialArgs) {
+function sagaTestEngine(effects, genFunc, envMapping, ...initialArgs) {
   assert(
     isGeneratorFunction(genFunc),
     'The first parameter must be a generator function.')
@@ -126,6 +125,9 @@ function _sagaTestEngine(effects, genFunc, envMapping, ...initialArgs) {
 
 module.exports = {
   sagaTestEngine,
+  collectPuts,
+  collectCalls,
+  collectCallsAndPuts,
   isEffect,
   isNestedEffect,
   isNestedArray,

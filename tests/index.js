@@ -2,7 +2,9 @@
 
 const test = require('ava')
 const {
-  sagaTestEngine,
+  collectPuts,
+  collectCalls,
+  collectCallsAndPuts,
   isEffect,
   isNestedArray,
   getNextVal,
@@ -10,6 +12,8 @@ const {
 } = require('../src')
 const {
   favSagaWorker,
+  sagaWithNoPuts,
+  sagaWithNestedSaga,
   getGlobalState,
   favItem,
   sucessfulFavItemAction,
@@ -18,8 +22,10 @@ const {
 } = require('../sagas')
 const { select, call, put } = require('redux-saga/effects')
 
+const sagaTestEngine = collectPuts
 
-test('isPut correctly identifies a PUT Saga Effect', t => {
+
+test('isEffect correctly identifies a PUT Saga Effect', t => {
   t.false(isEffect())
   t.false(isEffect({}, ['PUT']))
   t.false(isEffect(put, ['PUT']))
@@ -31,6 +37,19 @@ test('isPut correctly identifies a PUT Saga Effect', t => {
 
   t.true(isEffect(put({}), ['PUT']))
   t.true(isEffect({ PUT: 'someting' }, ['PUT']))
+})
+
+test('isEffect correctly identifies a CALL or PUT Saga Effect', t => {
+  t.false(isEffect(put, ['PUT', 'CALL']))
+  t.false(isEffect(call, ['PUT', 'CALL']))
+  t.false(isEffect(select, ['PUT', 'CALL']))
+  t.false(isEffect(select(() => 'select'), ['PUT', 'CALL']))
+  t.false(isEffect({ CALL: 'someting' }, ['PUT']))
+
+  t.true(isEffect(call(() => 'call'), ['PUT', 'CALL']))
+  t.true(isEffect(put({}), ['PUT', 'CALL']))
+  t.true(isEffect({ PUT: 'someting' }, ['PUT', 'CALL']))
+  t.true(isEffect({ CALL: 'someting' }, ['PUT', 'CALL']))
 })
 
 
@@ -53,6 +72,31 @@ test('isNestedEffect correctly identifies an array of PUT Saga Effects', t => {
 
   t.false(isNestedEffect([call(() => 1)], ['PUT']))
   t.false(isNestedEffect([put({}), select(() => 1), put({})], ['PUT']))
+})
+
+test('isNestedEffect correctly identifies an array of PUT or CALL Saga Effects', t => {
+  t.false(isNestedEffect())
+  t.false(isNestedEffect({}, ['PUT', 'CALL']))
+  t.false(isNestedEffect([], ['PUT', 'CALL']))
+  t.false(isNestedEffect(put, ['PUT', 'CALL']))
+  t.false(isNestedEffect(call, ['PUT', 'CALL']))
+  t.false(isNestedEffect(select, ['PUT', 'CALL']))
+  t.false(isNestedEffect(call(() => 'call'), ['PUT', 'CALL']))
+  t.false(isNestedEffect(select(() => 'select'), ['PUT', 'CALL']))
+  t.false(isNestedEffect({ CALL: 'someting' }, ['PUT', 'CALL']))
+  t.false(isNestedEffect(put({}), ['PUT', 'CALL']))
+  t.false(isNestedEffect({ PUT: 'someting' }), ['PUT', 'CALL'])
+
+  t.true(isNestedEffect([{ PUT: 'someting' }], ['PUT', 'CALL']))
+  t.true(isNestedEffect([put({})], ['PUT', 'CALL']))
+  t.true(isNestedEffect([put({}), put({}), put({})], ['PUT', 'CALL']))
+  t.true(isNestedEffect([{ CALL: 'someting' }], ['PUT', 'CALL']))
+  t.true(isNestedEffect([call(() => 1)], ['PUT', 'CALL']))
+  t.true(isNestedEffect([call(() => 1), put({}), put({})], ['PUT', 'CALL']))
+  t.true(isNestedEffect([put({}), call(() => 1), put({})], ['PUT', 'CALL']))
+
+  t.false(isNestedEffect([put({}), select(() => 1), put({})], ['PUT', 'CALL']))
+  t.false(isNestedEffect([call(() => 1), select(() => 1), put({})], ['PUT', 'CALL']))
 })
 
 
@@ -338,14 +382,6 @@ test('favSagaWorker works when given a Map', t => {
 })
 
 test('sagaTestEngine finds PUTs from yielded saga', t => {
-  function* sagaWithNestedSaga(action) {
-    yield put(loadingFavItemAction(true))
-
-    yield* favSagaWorker(action)
-
-    yield put(loadingFavItemAction(false))
-  }
-
   const itemId = '123'
   const token = '456'
   const user = { id: '321' }
@@ -372,5 +408,49 @@ test('sagaTestEngine finds PUTs from yielded saga', t => {
       put(loadingFavItemAction(false)),
     ],
     'Actions dispatched from nested saga'
+  )
+})
+
+test('collectCalls finds CALLs from saga', t => {
+  const token = '456'
+  const user = { id: '321' }
+
+  const ENV = [
+    [select(getGlobalState), { user, token }]
+  ]
+
+  t.deepEqual(
+    collectCalls(sagaWithNoPuts, ENV),
+    [call(favItem, token, user)],
+    'Collected call effect from saga'
+  )
+})
+
+test('collectCallsAndPuts finds CALLs and PUTs from saga', t => {
+  const itemId = '123'
+  const token = '456'
+  const user = { id: '321' }
+
+  const favItemResp = 'The favItem JSON response'
+  const favItemRespOBj = { json: () => favItemResp }
+
+  const FAV_ACTION = {
+    type: 'FAV_ITEM_REQUESTED',
+    payload: { itemId },
+  }
+
+  const ENV = [
+    [select(getGlobalState), { user, token }],
+    [call(favItem, itemId, token), favItemRespOBj],
+    [favItemResp, favItemResp]
+  ]
+
+  t.deepEqual(
+    collectCallsAndPuts(favSagaWorker, ENV, FAV_ACTION),
+    [
+      call(favItem, itemId, token),
+      put(sucessfulFavItemAction(favItemResp, itemId, user))
+    ],
+    'Collected call and put effects from saga'
   )
 })

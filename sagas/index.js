@@ -4,7 +4,7 @@ const { select, call, put } = require('redux-saga/effects')
 // ------------ Example ------------
 
 const getGlobalState = () => ({
-  user: {id: 'user1'},
+  user: { id: 'user1' },
   token: 'token'
 })
 
@@ -27,8 +27,24 @@ function* favSagaWorker(action) {
   }
 }
 
+function* sagaWithNoPuts() {
+  const { token, user } = yield select(getGlobalState)
+
+  yield call(favItem, token, user)
+}
+
+function* sagaWithNestedSaga(action) {
+  yield put(loadingFavItemAction(true))
+
+  yield* favSagaWorker(action)
+
+  yield put(loadingFavItemAction(false))
+}
+
 module.exports = {
   favSagaWorker,
+  sagaWithNoPuts,
+  sagaWithNestedSaga,
   getGlobalState,
   favItem,
   sucessfulFavItemAction,
