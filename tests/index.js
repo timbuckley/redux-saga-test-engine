@@ -3,10 +3,10 @@
 const test = require('ava')
 const {
   sagaTestEngine,
-  isPut,
+  isEffect,
   isNestedArray,
   getNextVal,
-  isNestedPut,
+  isNestedEffect,
 } = require('../src')
 const {
   favSagaWorker,
@@ -20,39 +20,39 @@ const { select, call, put } = require('redux-saga/effects')
 
 
 test('isPut correctly identifies a PUT Saga Effect', t => {
-  t.false(isPut())
-  t.false(isPut({}))
-  t.false(isPut(put))
-  t.false(isPut(call))
-  t.false(isPut(select))
-  t.false(isPut(call(() => 'call')))
-  t.false(isPut(select(() => 'select')))
-  t.false(isPut({CALL: 'someting'}))
+  t.false(isEffect())
+  t.false(isEffect({}, ['PUT']))
+  t.false(isEffect(put, ['PUT']))
+  t.false(isEffect(call, ['PUT']))
+  t.false(isEffect(select, ['PUT']))
+  t.false(isEffect(call(() => 'call'), ['PUT']))
+  t.false(isEffect(select(() => 'select'), ['PUT']))
+  t.false(isEffect({ CALL: 'someting' }, ['PUT']))
 
-  t.true(isPut(put({})))
-  t.true(isPut({PUT: 'someting'}))
+  t.true(isEffect(put({}), ['PUT']))
+  t.true(isEffect({ PUT: 'someting' }, ['PUT']))
 })
 
 
-test('isNestedPut correctly identifies an array of PUT Saga Effects', t => {
-  t.false(isNestedPut())
-  t.false(isNestedPut({}))
-  t.false(isNestedPut([]))
-  t.false(isNestedPut(put))
-  t.false(isNestedPut(call))
-  t.false(isNestedPut(select))
-  t.false(isNestedPut(call(() => 'call')))
-  t.false(isNestedPut(select(() => 'select')))
-  t.false(isNestedPut({CALL: 'someting'}))
-  t.false(isNestedPut(put({})))
-  t.false(isNestedPut({PUT: 'someting'}))
+test('isNestedEffect correctly identifies an array of PUT Saga Effects', t => {
+  t.false(isNestedEffect())
+  t.false(isNestedEffect({}, ['PUT']))
+  t.false(isNestedEffect([], ['PUT']))
+  t.false(isNestedEffect(put, ['PUT']))
+  t.false(isNestedEffect(call, ['PUT']))
+  t.false(isNestedEffect(select, ['PUT']))
+  t.false(isNestedEffect(call(() => 'call'), ['PUT']))
+  t.false(isNestedEffect(select(() => 'select'), ['PUT']))
+  t.false(isNestedEffect({ CALL: 'someting' }, ['PUT']))
+  t.false(isNestedEffect(put({}), ['PUT']))
+  t.false(isNestedEffect({ PUT: 'someting' }), ['PUT'])
 
-  t.true(isNestedPut([{PUT: 'someting'}]))
-  t.true(isNestedPut([put({})]))
-  t.true(isNestedPut([put({}), put({}), put({})]))
+  t.true(isNestedEffect([{ PUT: 'someting' }], ['PUT']))
+  t.true(isNestedEffect([put({})], ['PUT']))
+  t.true(isNestedEffect([put({}), put({}), put({})], ['PUT']))
 
-  t.false(isNestedPut([call(() => 1)]))
-  t.false(isNestedPut([put({}), select(() => 1), put({})]))
+  t.false(isNestedEffect([call(() => 1)], ['PUT']))
+  t.false(isNestedEffect([put({}), select(() => 1), put({})], ['PUT']))
 })
 
 
@@ -81,9 +81,9 @@ test('getNextVal', t => {
   t.is(
     'val',
     getNextVal(
-      {a: {b: {c: 1}}},
+      { a: { b: { c: 1 } } },
       [
-        [{a: {b: {c: 1}}}, 'val']
+        [{ a: { b: { c: 1 } } }, 'val']
       ]
     ),
     'Handled deeply-nested objects in arrays'
@@ -91,9 +91,9 @@ test('getNextVal', t => {
   t.is(
     undefined,
     getNextVal(
-      {a: {b: {c: 2}}},
+      { a: { b: { c: 2 } } },
       [
-        [{a: {b: {c: 1}}}, 'val']
+        [{ a: { b: { c: 1 } } }, 'val']
       ]
     ),
     'Handled deeply-nested objects in arrays part 2'
@@ -105,9 +105,9 @@ test('getNextVal', t => {
   t.is(
     'val',
     getNextVal(
-      {a: {b: {c: 1}}},
+      { a: { b: { c: 1 } } },
       new Map([
-        [{a: {b: {c: 1}}}, 'val']
+        [{ a: { b: { c: 1 } } }, 'val']
       ])
     ),
     'Handled deeply-nested objects in Map'
@@ -115,9 +115,9 @@ test('getNextVal', t => {
   t.is(
     undefined,
     getNextVal(
-      {a: {b: {c: 2}}},
+      { a: { b: { c: 2 } } },
       new Map([
-        [{a: {b: {c: 1}}}, 'val']
+        [{ a: { b: { c: 1 } } }, 'val']
       ])
     ),
     'Handled deeply-nested objects in Map part 2'
@@ -133,7 +133,7 @@ test('getNextVal', t => {
 })
 
 test('sagaTestEngine throws under bad conditions', t => {
-  const genericGenFunc = function*() {}
+  const genericGenFunc = function* () { }
   const generator = genericGenFunc()
 
   // First assert.
@@ -161,7 +161,7 @@ test('sagaTestEngine throws under bad conditions', t => {
     'The second parameter must be a nested array or Map.')
 
   // Third assert.
-  const f = function*() {
+  const f = function* () {
     yield 'key'
   }
   const badMapping = [['incorrect key', 'value']]
@@ -170,8 +170,8 @@ test('sagaTestEngine throws under bad conditions', t => {
     'Env Mapping is missing a value for "key"')
 
   // Bad mapping for saga that yields obj with anonymous function
-  function namedFunction() {}
-  const f2 = function*() {
+  function namedFunction() { }
+  const f2 = function* () {
     yield { func: namedFunction }
   }
   const badMapping2 = [['bad', 'mapping']]
@@ -181,10 +181,10 @@ test('sagaTestEngine throws under bad conditions', t => {
   )
 
   // Bad mapping for saga that yields object with anonymous function
-  const anonymousFunction = function() { return 'something' }
+  const anonymousFunction = function () { return 'something' }
   // Skip the anonymous function test if this anonymous functon is named (done in newer node versions)
   if (!anonymousFunction.name) {
-    const f3 = function*() {
+    const f3 = function* () {
       yield { func: anonymousFunction }
     }
     const badMapping3 = [['bad', 'mapping']]
@@ -198,28 +198,28 @@ test('sagaTestEngine throws under bad conditions', t => {
   const goodMapping = [['key', 'value']]
   t.notThrows(() => sagaTestEngine(f, goodMapping))
 
-  const f4 = function*() {
+  const f4 = function* () {
     yield 'key1'
     yield 'key2'
   }
   const goodMapping2 = [['key1', 'value1'], ['key2', 'value2']]
   t.notThrows(() => sagaTestEngine(f4, goodMapping2))
 
-  const f5 = function*() {
+  const f5 = function* () {
     yield undefined
   }
   const goodMapping3 = [[undefined, undefined]]
   t.notThrows(() => sagaTestEngine(f5, goodMapping3))
 
-  const f6 = function*() {
-    yield [put({a: 1})]
+  const f6 = function* () {
+    yield [put({ a: 1 })]
   }
   t.notThrows(
     () => sagaTestEngine(f6, goodMapping3),
     'Correctly handles nested array of puts'
   )
 
-  const f7 = function*() {
+  const f7 = function* () {
     yield [select(() => 1)]
   }
   t.throws(() => sagaTestEngine(f7, goodMapping3))
@@ -231,9 +231,9 @@ test('sagaTestEngine correctly handles array of PUTS', t => {
   function* sagaWithNestedPuts() {
     const someString = yield select(selectorFunc)
     yield [
-      put({a: 1}),
-      put({b: 2}),
-      put({c: someString}),
+      put({ a: 1 }),
+      put({ b: 2 }),
+      put({ c: someString }),
     ]
     yield put('another put')
   }
@@ -246,9 +246,9 @@ test('sagaTestEngine correctly handles array of PUTS', t => {
     sagaTestEngine(sagaWithNestedPuts, envMapping),
     [
       [
-        put({a: 1}),
-        put({b: 2}),
-        put({c: 'someString'}),
+        put({ a: 1 }),
+        put({ b: 2 }),
+        put({ c: 'someString' }),
       ],
       put('another put'),
     ],
@@ -260,7 +260,7 @@ test('sagaTestEngine correctly handles array of PUTS', t => {
 test('Example favSagaWorker with happy path works', t => {
   const itemId = '123'
   const token = '456'
-  const user = {id: '321'}
+  const user = { id: '321' }
 
   const favItemResp = 'The favItem JSON response'
   const favItemRespOBj = { json: () => favItemResp }
@@ -287,10 +287,10 @@ test('Example favSagaWorker with happy path works', t => {
 test('Example favSagaWorker with sad path works', t => {
   const itemId = '123'
   const token = '456'
-  const user = {id: '321'}
+  const user = { id: '321' }
 
   const favItemRespFail = new TypeError('TypeError: response.json is not a function')
-  const favItemRespOBjFail = { json: () => {throw favItemRespFail} }
+  const favItemRespOBjFail = { json: () => { throw favItemRespFail } }
 
   const FAV_ACTION = {
     type: 'FAV_ITEM_REQUESTED',
@@ -314,7 +314,7 @@ test('Example favSagaWorker with sad path works', t => {
 test('favSagaWorker works when given a Map', t => {
   const itemId = '123'
   const token = '456'
-  const user = {id: '321'}
+  const user = { id: '321' }
 
   const favItemResp = 'The favItem JSON response'
   const favItemRespOBj = { json: () => favItemResp }
@@ -348,7 +348,7 @@ test('sagaTestEngine finds PUTs from yielded saga', t => {
 
   const itemId = '123'
   const token = '456'
-  const user = {id: '321'}
+  const user = { id: '321' }
 
   const favItemResp = 'The favItem JSON response'
   const favItemRespOBj = { json: () => favItemResp }
