@@ -82,7 +82,6 @@ const collectPuts = createSagaTestEngine(['PUT'])
 const collectCalls = createSagaTestEngine(['CALL'])
 const collectCallsAndPuts = createSagaTestEngine(['CALL', 'PUT'])
 
-
 function sagaTestEngine(effects, genFunc, envMapping, ...initialArgs) {
   assert(
     isGeneratorFunction(genFunc),

@@ -24,7 +24,6 @@ const { select, call, put } = require('redux-saga/effects')
 
 const sagaTestEngine = collectPuts
 
-
 test('isEffect correctly identifies a PUT Saga Effect', t => {
   t.false(isEffect())
   t.false(isEffect({}, ['PUT']))
