@@ -4,13 +4,16 @@ const deepEqual = require('deep-equal')
 
 const bool = o => !!o
 
-const isPut = obj => bool(obj && Object.keys(obj).includes('PUT'))
+const isEffect = (obj, effects = []) => bool(
+  obj &&
+  Object.keys(obj).some((key) => effects.includes(key))
+)
 
-const isNestedPut = arr => bool(
+const isNestedEffect = (arr, effects = []) => bool(
   arr &&
   arr.every &&
   arr.length > 0 &&
-  arr.every(element => isPut(element))
+  arr.every(element => isEffect(element, effects))
 )
 
 const isNestedArray = arr => bool(
@@ -70,7 +73,14 @@ function stringifyVal(val) {
   }, 2)
 }
 
-function sagaTestEngine(genFunc, envMapping, ...initialArgs) {
+// Creates sagaTestEngine that collects yielded effects specified by the effects argument
+const createSagaTestEngine = (effects = ['PUT']) => (...args) => sagaTestEngine(effects, ...args)
+
+const collectPuts = createSagaTestEngine(['PUT'])
+const collectCalls = createSagaTestEngine(['CALL'])
+const collectCallsAndPuts = createSagaTestEngine(['CALL', 'PUT'])
+
+function sagaTestEngine(effects, genFunc, envMapping, ...initialArgs) {
   assert(
     isGeneratorFunction(genFunc),
     'The first parameter must be a generator function.')
@@ -81,7 +91,7 @@ function sagaTestEngine(genFunc, envMapping, ...initialArgs) {
   const mapping = [...envMapping, [undefined, undefined]]
   const gen = genFunc(...initialArgs)
   let val = undefined
-  let puts = []
+  let collectedEffects = []
   let isDone = false
   let counter = 0
 
@@ -92,9 +102,9 @@ function sagaTestEngine(genFunc, envMapping, ...initialArgs) {
     const isFirstLoop = counter === 0
     const nextValFound = nextVal !== undefined
     const yieldedUndefined = val === undefined
-    const yieldedEffectIsPut = isPut(val) || isNestedPut(val)
+    const yieldedEffectShouldBeCollected = isEffect(val, effects) || isNestedEffect(val, effects)
     assert(
-      (isFirstLoop || nextValFound || yieldedUndefined || yieldedEffectIsPut),
+      (isFirstLoop || nextValFound || yieldedUndefined || yieldedEffectShouldBeCollected),
       `Env Mapping is missing a value for ${stringifyVal(val)}`)
 
     const genResult = gen.next(nextVal)
@@ -102,18 +112,22 @@ function sagaTestEngine(genFunc, envMapping, ...initialArgs) {
     val = genResult.value
     isDone = genResult.done
 
-    if (isPut(val) || isNestedPut(val)) {
-      puts.push(val)
+    if (isEffect(val, effects) || isNestedEffect(val, effects)) {
+      collectedEffects.push(val)
     }
     counter++
   }
-  return puts
+  return collectedEffects
 }
 
 module.exports = {
+  createSagaTestEngine,
   sagaTestEngine,
-  isPut,
-  isNestedPut,
+  collectPuts,
+  collectCalls,
+  collectCallsAndPuts,
+  isEffect,
+  isNestedEffect,
   isNestedArray,
   getNextVal,
   assert,
