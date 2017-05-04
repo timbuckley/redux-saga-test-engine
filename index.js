@@ -7,7 +7,10 @@ const {
     createSagaTestEngine
 } = require('./src')
 
-exports.default = collectPuts
-exports.collectCalls = collectCalls
-exports.collectCallsAndPuts = collectCallsAndPuts
-exports.createSagaTestEngine = createSagaTestEngine
+module.exports = {
+  default: createSagaTestEngine,
+  createSagaTestEngine,
+  collectPuts,
+  collectCalls,
+  collectCallsAndPuts,
+}

@@ -6,9 +6,7 @@ const bool = o => !!o
 
 const isEffect = (obj, effects = []) => bool(
   obj &&
-  Object.keys(obj).some((key) =>
-    effects.indexOf(key) !== -1
-  )
+  Object.keys(obj).some((key) => effects.includes(key))
 )
 
 const isNestedEffect = (arr, effects = []) => bool(
@@ -123,6 +121,7 @@ function sagaTestEngine(effects, genFunc, envMapping, ...initialArgs) {
 }
 
 module.exports = {
+  createSagaTestEngine,
   sagaTestEngine,
   collectPuts,
   collectCalls,
