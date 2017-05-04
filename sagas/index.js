@@ -5,7 +5,7 @@ const { select, call, put } = require('redux-saga/effects')
 
 const getGlobalState = () => ({
   user: { id: 'user1' },
-  token: 'token'
+  token: 'token',
 })
 
 const favItem = () => ({})

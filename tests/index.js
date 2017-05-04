@@ -126,7 +126,7 @@ test('getNextVal', t => {
     getNextVal(
       { a: { b: { c: 1 } } },
       [
-        [{ a: { b: { c: 1 } } }, 'val']
+        [{ a: { b: { c: 1 } } }, 'val'],
       ]
     ),
     'Handled deeply-nested objects in arrays'
@@ -136,7 +136,7 @@ test('getNextVal', t => {
     getNextVal(
       { a: { b: { c: 2 } } },
       [
-        [{ a: { b: { c: 1 } } }, 'val']
+        [{ a: { b: { c: 1 } } }, 'val'],
       ]
     ),
     'Handled deeply-nested objects in arrays part 2'
@@ -150,7 +150,7 @@ test('getNextVal', t => {
     getNextVal(
       { a: { b: { c: 1 } } },
       new Map([
-        [{ a: { b: { c: 1 } } }, 'val']
+        [{ a: { b: { c: 1 } } }, 'val'],
       ])
     ),
     'Handled deeply-nested objects in Map'
@@ -160,7 +160,7 @@ test('getNextVal', t => {
     getNextVal(
       { a: { b: { c: 2 } } },
       new Map([
-        [{ a: { b: { c: 1 } } }, 'val']
+        [{ a: { b: { c: 1 } } }, 'val'],
       ])
     ),
     'Handled deeply-nested objects in Map part 2'
@@ -282,7 +282,7 @@ test('sagaTestEngine correctly handles array of PUTS', t => {
   }
 
   const envMapping = [
-    [select(selectorFunc), 'someString']
+    [select(selectorFunc), 'someString'],
   ]
 
   t.deepEqual(
@@ -316,7 +316,7 @@ test('Example favSagaWorker with happy path works', t => {
   const ENV = [
     [select(getGlobalState), { user, token }],
     [call(favItem, itemId, token), favItemRespOBj],
-    [favItemResp, favItemResp]
+    [favItemResp, favItemResp],
   ]
 
   t.deepEqual(
@@ -343,7 +343,7 @@ test('Example favSagaWorker with sad path works', t => {
   const ENV = [
     [select(getGlobalState), { user, token }],
     [call(favItem, itemId, token), favItemRespOBjFail],
-    [favItemRespFail, favItemRespFail]
+    [favItemRespFail, favItemRespFail],
   ]
 
   t.deepEqual(
@@ -370,7 +370,7 @@ test('favSagaWorker works when given a Map', t => {
   const ENV = new Map([
     [select(getGlobalState), { user, token }],
     [call(favItem, itemId, token), favItemRespOBj],
-    [favItemResp, favItemResp]
+    [favItemResp, favItemResp],
   ])
 
   t.deepEqual(
@@ -415,7 +415,7 @@ test('collectCalls finds CALLs from saga', t => {
   const user = { id: '321' }
 
   const ENV = [
-    [select(getGlobalState), { user, token }]
+    [select(getGlobalState), { user, token }],
   ]
 
   t.deepEqual(
@@ -441,14 +441,14 @@ test('collectCallsAndPuts finds CALLs and PUTs from saga', t => {
   const ENV = [
     [select(getGlobalState), { user, token }],
     [call(favItem, itemId, token), favItemRespOBj],
-    [favItemResp, favItemResp]
+    [favItemResp, favItemResp],
   ]
 
   t.deepEqual(
     collectCallsAndPuts(favSagaWorker, ENV, FAV_ACTION),
     [
       call(favItem, itemId, token),
-      put(sucessfulFavItemAction(favItemResp, itemId, user))
+      put(sucessfulFavItemAction(favItemResp, itemId, user)),
     ],
     'Collected call and put effects from saga'
   )

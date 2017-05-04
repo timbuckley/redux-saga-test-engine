@@ -1,10 +1,10 @@
 'use strict'
 
 const {
-    collectPuts,
-    collectCalls,
-    collectCallsAndPuts,
-    createSagaTestEngine
+  collectPuts,
+  collectCalls,
+  collectCallsAndPuts,
+  createSagaTestEngine,
 } = require('./src')
 
 module.exports = {
