@@ -4,10 +4,10 @@
 Test your `redux-saga` generator functions with less pain.
 
 ## Contents
-  - [Installation](#Installation)
-  - [Usage](#Usage)
-  - [Full Example](#Full Example)
-  - [FAQ](#FAQ)
+  - [Installation](#installation)
+  - [Usage](#usage)
+  - [Full Example](#full-example)
+  - [FAQ](#faq)
     - [Q: What's the deal with this?](#q-whats-the-deal-with-this)
     - [Q: Why not just use redux-saga-test?](#q-why-not-just-use-redux-saga-test)
     - [Q: Why not just use redux-saga-test-plan?](#q-why-not-just-use-redux-saga-test-plan)
