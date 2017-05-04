@@ -3,6 +3,19 @@
 
 Test your `redux-saga` generator functions with less pain.
 
+## Contents
+  - [Installation](#Installation)
+  - [Usage](#Usage)
+  - [Full Example](#Full Example)
+  - [FAQ](#FAQ)
+    - [Q: What's the deal with this?](#q-whats-the-deal-with-this)
+    - [Q: Why not just use redux-saga-test?](#q-why-not-just-use-redux-saga-test)
+    - [Q: Why not just use redux-saga-test-plan?](#q-why-not-just-use-redux-saga-test-plan)
+    - [Q: Why not just do it manually?](#q-why-not-just-do-it-manually-example)
+    - [Q: Why not use a Map for the second argument (the envMapping)?](#q-why-not-use-a-map-for-the-second-argument-the-envmapping)
+    - [Q: I know a better way](##q-i-know-a-better-way)
+  - [License](#license)
+
 ## Installation
 
 With `npm`:
