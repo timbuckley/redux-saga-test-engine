@@ -24,6 +24,11 @@ const isNestedArray = arr => bool(
 
 const isMap = m => bool(Object.prototype.toString.call(m) === '[object Map]')
 
+// check if consumer is yielding our effect to immediatly cause the generator function to throw an error
+const shouldThrowError = obj => bool(obj && Object.keys(obj).includes('@THROW'))
+
+const throwError = message => ({ '@THROW': message })
+
 // Lifted from https://github.com/tj/co/blob/717b043371ba057cb7a4a2a4e47120d598116ed7/index.js#L221
 function isGeneratorFunction(obj) {
   const { constructor } = (obj || {})
@@ -97,6 +102,8 @@ function sagaTestEngine(effects, genFunc, envMapping, ...initialArgs) {
 
   while (!isDone) {
     const nextVal = getNextVal(val, mapping)
+    const throwError = shouldThrowError(nextVal)
+    let genResult
 
     // Yielded value must appear in mapping, or be a PUT Effect.
     const isFirstLoop = counter === 0
@@ -107,7 +114,11 @@ function sagaTestEngine(effects, genFunc, envMapping, ...initialArgs) {
       (isFirstLoop || nextValFound || yieldedUndefined || yieldedEffectShouldBeCollected),
       `Env Mapping is missing a value for ${stringifyVal(val)}`)
 
-    const genResult = gen.next(nextVal)
+    if (throwError) {
+      genResult = gen.throw('ERROR')
+    } else {
+      genResult = gen.next(nextVal)
+    }
 
     val = genResult.value
     isDone = genResult.done
@@ -132,4 +143,6 @@ module.exports = {
   getNextVal,
   assert,
   stringifyVal,
+  throwError,
+  shouldThrowError,
 }

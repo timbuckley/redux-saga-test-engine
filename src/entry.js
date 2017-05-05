@@ -1,11 +1,12 @@
 'use strict'
 
 const {
-    collectPuts,
-    collectCalls,
-    collectCallsAndPuts,
-    createSagaTestEngine,
-} = require('./index')
+  throwError,
+  collectPuts,
+  collectCalls,
+  collectCallsAndPuts,
+  createSagaTestEngine,
+} = require('./src')
 
 module.exports = {
   default: createSagaTestEngine,
@@ -13,4 +14,5 @@ module.exports = {
   collectPuts,
   collectCalls,
   collectCallsAndPuts,
+  throwError,
 }
