@@ -5,13 +5,15 @@
   "engines": {
     "node": ">=6.0.0"
   },
-  "main": "index.js",
+  "main": "build/entry.js",
   "repository": "DNAinfo/redux-saga-test-engine",
   "scripts": {
     "start": "npm install",
     "test": "ava tests/",
     "test:watch": "npm test -- --watch",
-    "lint": "eslint ./"
+    "lint": "eslint ./",
+    "build": "rimraf build && cross-env BABEL_ENV=es babel src -d build --ignore 'tests'",
+    "prepublish": "npm run build"
   },
   "engine": {
     "node": ">=6.0.0"
@@ -28,8 +30,13 @@
   },
   "devDependencies": {
     "ava": "^0.18.2",
+    "babel-cli": "^6.24.1",
+    "babel-core": "^6.24.1",
     "babel-eslint": "^7.1.1",
+    "babel-preset-env": "^1.4.0",
+    "cross-env": "^4.0.0",
     "eslint": "^3.13.0",
-    "redux-saga": "^0.14.1"
+    "redux-saga": "^0.14.1",
+    "rimraf": "^2.6.1"
   }
 }
