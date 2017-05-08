@@ -130,7 +130,7 @@ test('shouldThrowError correctly identifies a throw effect', t => {
   t.false(shouldThrowError({ PUT: 'someting' }))
 
   t.true(shouldThrowError(throwError('error')))
-  t.true(shouldThrowError({ '@THROW': 'someting' }))
+  t.true(shouldThrowError({ '@@redux-saga-test-engine/ERROR': 'someting' }))
 })
 
 
