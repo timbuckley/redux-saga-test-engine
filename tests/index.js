@@ -9,6 +9,8 @@ const {
   isNestedArray,
   getNextVal,
   isNestedEffect,
+  throwError,
+  shouldThrowError,
 } = require('../src')
 const {
   favSagaWorker,
@@ -113,6 +115,22 @@ test('isNestedArray correctly identifies a nested array', t => {
   t.true(isNestedArray([['key', 'val']]))
   t.true(isNestedArray([['key', 'val']]))
   t.true(isNestedArray([[undefined, undefined]]))
+})
+
+test('shouldThrowError correctly identifies a throw effect', t => {
+  t.false(shouldThrowError())
+  t.false(shouldThrowError({}))
+  t.false(shouldThrowError(put))
+  t.false(shouldThrowError(call))
+  t.false(shouldThrowError(select))
+  t.false(shouldThrowError(call(() => 'call')))
+  t.false(shouldThrowError(select(() => 'select')))
+  t.false(shouldThrowError({ CALL: 'someting' }))
+  t.false(shouldThrowError(put({})))
+  t.false(shouldThrowError({ PUT: 'someting' }))
+
+  t.true(shouldThrowError(throwError('error')))
+  t.true(shouldThrowError({ '@@redux-saga-test-engine/ERROR': 'someting' }))
 })
 
 
@@ -349,6 +367,30 @@ test('Example favSagaWorker with sad path works', t => {
   t.deepEqual(
     sagaTestEngine(favSagaWorker, ENV, FAV_ACTION),
     [put(receivedFavItemErrorAction(favItemRespFail, itemId))],
+    'Not happy path'
+  )
+})
+
+
+test('Example favSagaWorker with throwError effect follows sad path', t => {
+  const itemId = '123'
+  const token = '456'
+  const user = { id: '321' }
+  const errorMsg = 'ERROR'
+
+  const FAV_ACTION = {
+    type: 'FAV_ITEM_REQUESTED',
+    payload: { itemId },
+  }
+
+  const ENV = [
+    [select(getGlobalState), { user, token }],
+    [call(favItem, itemId, token), throwError(errorMsg)],
+  ]
+
+  t.deepEqual(
+    sagaTestEngine(favSagaWorker, ENV, FAV_ACTION),
+    [put(receivedFavItemErrorAction(errorMsg, itemId))],
     'Not happy path'
   )
 })
