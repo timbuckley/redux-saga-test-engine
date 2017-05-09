@@ -11,7 +11,7 @@ const {
   isNestedEffect,
   throwError,
   shouldThrowError,
-} = require('../src')
+} = require('../src/core')
 const {
   favSagaWorker,
   sagaWithNoPuts,
