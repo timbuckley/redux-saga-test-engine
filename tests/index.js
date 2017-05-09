@@ -324,7 +324,7 @@ test('Example favSagaWorker with happy path works', t => {
   const user = { id: '321' }
 
   const favItemResp = 'The favItem JSON response'
-  const favItemRespOBj = { json: () => favItemResp }
+  const favItemRespObj = { json: () => favItemResp }
 
   const FAV_ACTION = {
     type: 'FAV_ITEM_REQUESTED',
@@ -333,7 +333,7 @@ test('Example favSagaWorker with happy path works', t => {
 
   const ENV = [
     [select(getGlobalState), { user, token }],
-    [call(favItem, itemId, token), favItemRespOBj],
+    [call(favItem, itemId, token), favItemRespObj],
     [favItemResp, favItemResp],
   ]
 
@@ -351,7 +351,7 @@ test('Example favSagaWorker with sad path works', t => {
   const user = { id: '321' }
 
   const favItemRespFail = new TypeError('TypeError: response.json is not a function')
-  const favItemRespOBjFail = { json: () => { throw favItemRespFail } }
+  const favItemRespObjFail = { json: () => { throw favItemRespFail } }
 
   const FAV_ACTION = {
     type: 'FAV_ITEM_REQUESTED',
@@ -360,7 +360,7 @@ test('Example favSagaWorker with sad path works', t => {
 
   const ENV = [
     [select(getGlobalState), { user, token }],
-    [call(favItem, itemId, token), favItemRespOBjFail],
+    [call(favItem, itemId, token), favItemRespObjFail],
     [favItemRespFail, favItemRespFail],
   ]
 
@@ -402,7 +402,7 @@ test('favSagaWorker works when given a Map', t => {
   const user = { id: '321' }
 
   const favItemResp = 'The favItem JSON response'
-  const favItemRespOBj = { json: () => favItemResp }
+  const favItemRespObj = { json: () => favItemResp }
 
   const FAV_ACTION = {
     type: 'FAV_ITEM_REQUESTED',
@@ -411,7 +411,7 @@ test('favSagaWorker works when given a Map', t => {
 
   const ENV = new Map([
     [select(getGlobalState), { user, token }],
-    [call(favItem, itemId, token), favItemRespOBj],
+    [call(favItem, itemId, token), favItemRespObj],
     [favItemResp, favItemResp],
   ])
 
@@ -428,7 +428,7 @@ test('sagaTestEngine finds PUTs from yielded saga', t => {
   const user = { id: '321' }
 
   const favItemResp = 'The favItem JSON response'
-  const favItemRespOBj = { json: () => favItemResp }
+  const favItemRespObj = { json: () => favItemResp }
 
   const FAV_ACTION = {
     type: 'FAV_ITEM_REQUESTED',
@@ -437,7 +437,7 @@ test('sagaTestEngine finds PUTs from yielded saga', t => {
 
   const ENV = [
     [select(getGlobalState), { user, token }],
-    [call(favItem, itemId, token), favItemRespOBj],
+    [call(favItem, itemId, token), favItemRespObj],
     [favItemResp, favItemResp],
   ]
 
@@ -473,7 +473,7 @@ test('collectCallsAndPuts finds CALLs and PUTs from saga', t => {
   const user = { id: '321' }
 
   const favItemResp = 'The favItem JSON response'
-  const favItemRespOBj = { json: () => favItemResp }
+  const favItemRespObj = { json: () => favItemResp }
 
   const FAV_ACTION = {
     type: 'FAV_ITEM_REQUESTED',
@@ -482,7 +482,7 @@ test('collectCallsAndPuts finds CALLs and PUTs from saga', t => {
 
   const ENV = [
     [select(getGlobalState), { user, token }],
-    [call(favItem, itemId, token), favItemRespOBj],
+    [call(favItem, itemId, token), favItemRespObj],
     [favItemResp, favItemResp],
   ]
 
