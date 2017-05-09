@@ -11,7 +11,7 @@
     "start": "npm install",
     "test": "ava tests/",
     "test:watch": "npm test -- --watch",
-    "lint": "eslint ./",
+    "lint": "eslint ./src ./tests",
     "build": "rimraf build && cross-env BABEL_ENV=es babel src -d build --ignore 'tests'",
     "prepublish": "npm run build"
   },
