@@ -13,7 +13,7 @@ Test your `redux-saga` generator functions with less pain.
     - [Q: Why not just use redux-saga-test-plan?](#q-why-not-just-use-redux-saga-test-plan)
     - [Q: Why not just do it manually?](#q-why-not-just-do-it-manually-example)
     - [Q: Why not use a Map for the second argument (the envMapping)?](#q-why-not-use-a-map-for-the-second-argument-the-envmapping)
-    - [Q: I know a better way](##q-i-know-a-better-way)
+    - [Q: I know a better way](#q-i-know-a-better-way)
   - [License](#license)
 
 ## Installation
