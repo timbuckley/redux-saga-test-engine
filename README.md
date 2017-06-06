@@ -140,6 +140,12 @@ const {
   collectPuts,
   collectCalls,
   collectCallsAndPuts,
+
+  // Helper method.
+  // If used as a value in the mapping, it throws an error inside the saga function
+  // when the corresponding effect is found in the saga. If inside a try-catch,
+  // the argument provided to throwError will be passed to the catch function.
+  throwError,
 } = require('redux-saga-test-engine')
 ```
 
