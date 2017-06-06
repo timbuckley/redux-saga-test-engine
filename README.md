@@ -7,6 +7,7 @@ Test your `redux-saga` generator functions with less pain.
   - [Installation](#installation)
   - [Usage](#usage)
   - [Full Example](#full-example)
+  - [API](#api)
   - [FAQ](#faq)
     - [Q: What's the deal with this?](#q-whats-the-deal-with-this)
     - [Q: Why not just use redux-saga-test?](#q-why-not-just-use-redux-saga-test)
@@ -123,6 +124,22 @@ test('favSagaWorker', t => {
     'We should see the `sucessfulFavItemAction` dispatched with the correct information'
   )
 })
+```
+
+## API
+
+```js
+const {
+  // Creates a collector function to collect arbitrary effects.
+  // Example:
+  //    const getPuts = createSagaTestEngine(['PUT'])
+  createSagaTestEngine,
+
+  // Convenient pre-filled collector functions to collect PUTs, CALLs, or both.
+  collectPuts,
+  collectCalls,
+  collectCallsAndPuts,
+} = require('redux-saga-test-engine')
 ```
 
 
