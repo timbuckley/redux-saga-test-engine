@@ -31,10 +31,12 @@ yarn add redux-saga-test-engine --dev
 ## Usage
 
 ```js
-const sagaTestEngine = require('redux-saga-test-engine')
+const { createSagaTestEngine } = require('redux-saga-test-engine')
 
+// Choose which effect types you want to collect from the saga.
+const collectEffects = createSagaTestEngine(['PUT', 'CALL'])
 
-const actualPuts = sagaTestEngine(
+const actualEffects = collectEffects(
   // This is the saga we are testing.
   sagaToTest,
 
@@ -52,8 +54,9 @@ const actualPuts = sagaTestEngine(
   initialAction
 )
 
-actualPuts
+actualEffects
 // [
+//   call(API.doWeLovePuppies),
 //   put(petPuppy(puppy)),
 //   put(hugPuppy(puppy))
 // ]
