@@ -7,6 +7,7 @@ Test your `redux-saga` generator functions with less pain.
   - [Installation](#installation)
   - [Usage](#usage)
   - [Full Example](#full-example)
+  - [API](#api)
   - [FAQ](#faq)
     - [Q: What's the deal with this?](#q-whats-the-deal-with-this)
     - [Q: Why not just use redux-saga-test?](#q-why-not-just-use-redux-saga-test)
@@ -31,17 +32,19 @@ yarn add redux-saga-test-engine --dev
 ## Usage
 
 ```js
-const sagaTestEngine = require('redux-saga-test-engine')
+const { createSagaTestEngine } = require('redux-saga-test-engine')
 
+// Choose which effect types you want to collect from the saga.
+const collectEffects = createSagaTestEngine(['PUT', 'CALL'])
 
-const actualPuts = sagaTestEngine(
+const actualEffects = collectEffects(
   // This is the saga we are testing.
   sagaToTest,
 
   // The environment mapping of redux effect calls to their corresponding yielded value.
-  // If the `sagaTestEngine` encounters a non-`put` yielded in the saga, it
-  // needs to be told what to yield. Worth noting here that the order does
-  // NOT matter, as long as you don't have duplicate keys.
+  // If the the collector function encounters a non-`put` yielded in the saga,
+  // it needs to be told what to yield. Worth noting here that the order does NOT
+  // matter, as long as you don't have duplicate keys.
   [
     [select(getPuppy), {barks: true, cute: 'Definitely'}],
     [call(API.doWeLovePuppies), {answer: 'Of course we do!'}]
@@ -52,8 +55,9 @@ const actualPuts = sagaTestEngine(
   initialAction
 )
 
-actualPuts
+actualEffects
 // [
+//   call(API.doWeLovePuppies),
 //   put(petPuppy(puppy)),
 //   put(hugPuppy(puppy))
 // ]
@@ -81,12 +85,12 @@ function* favSagaWorker(action) {
 ```js
 // favSaga.spec.js
 const test = require('ava')
-const sagaTestEngine = require('redux-saga-test-engine')
+const { collectPuts } = require('redux-saga-test-engine')
 const {
   favSagaWorker,
   getGlobalState,
   favItem,
-  sucessfulFavItemAction
+  sucessfulFavItemAction,
 } = require('../sagas')
 
 const { select, call, put } = require('redux-saga/effects')
@@ -108,10 +112,10 @@ test('favSagaWorker', t => {
   const ENV = [
     [select(getGlobalState), { user, token }],
     [call(favItem, itemId, token), favItemRespOBj],
-    [favItemResp, favItemResp]
+    [favItemResp, favItemResp],
   ]
 
-  const actual = sagaTestEngine((favSagaWorker), ENV, FAV_ACTION)
+  const actual = collectPuts((favSagaWorker), ENV, FAV_ACTION)
   const expected = [put(sucessfulFavItemAction(favItemResp, itemId, user))]
 
   t.deepEqual(
@@ -120,6 +124,23 @@ test('favSagaWorker', t => {
     'We should see the `sucessfulFavItemAction` dispatched with the correct information'
   )
 })
+```
+
+
+## API
+
+```js
+const {
+  // Creates a collector function to collect arbitrary effects.
+  // Example:
+  //    const getPuts = createSagaTestEngine(['PUT'])
+  createSagaTestEngine,
+
+  // Convenient pre-filled collector functions to collect PUTs, CALLs, or both.
+  collectPuts,
+  collectCalls,
+  collectCallsAndPuts,
+} = require('redux-saga-test-engine')
 ```
 
 
@@ -216,7 +237,7 @@ it('should cancel login task', () => {
 
 ### Q: Why not use a `Map` for the second argument (the `envMapping`)?
 **A**:
-_**NOTE**: The main `sagaTestEngine` now accepts a `Map` as well as a nested array. But it isn't actually helpful, as described below._
+_**NOTE**: The collector functions now accept a `Map` as well as a nested array. But it isn't actually helpful, as described below._
 
 Maps only work if the key is referencing the identical object (ie `a === b`), even if their values are the same (ie `deepEqual(a, b)`). Thus a corresponding `select(...)` value, for example, would not be found merely by using `envMap.get(select(...))`. Instead, the keys must be traversed though - and so it's no more helpful to use a Map than a simple nested Array.
 
