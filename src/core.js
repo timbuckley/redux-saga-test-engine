@@ -127,7 +127,7 @@ function sagaTestEngine(effects, genFunc, envMapping, ...initialArgs) {
     if (isEffect(val, effects) || isNestedEffect(val, effects)) {
       collectedEffects.push(val)
     }
-    counter++
+    counter += 1
   }
   return collectedEffects
 }
