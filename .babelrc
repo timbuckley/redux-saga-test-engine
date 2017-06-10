@@ -1,9 +1,11 @@
 {
   "presets": [
       ["env", {
+        "production": {
           "targets": {
               "node": 4
           }
+        }
       }]
   ]
 }
