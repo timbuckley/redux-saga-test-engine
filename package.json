@@ -5,6 +5,9 @@
   "engines": {
     "node": ">=6.0.0"
   },
+  "engine": {
+    "node": ">=6.0.0"
+  },
   "main": "build/index.js",
   "repository": "DNAinfo/redux-saga-test-engine",
   "scripts": {
