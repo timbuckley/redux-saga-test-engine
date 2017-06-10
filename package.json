@@ -15,9 +15,6 @@
     "build": "rimraf build && cross-env BABEL_ENV=es babel src -d build --ignore 'tests'",
     "prepublish": "npm run build"
   },
-  "engine": {
-    "node": ">=6.0.0"
-  },
   "keywords": [
     "redux",
     "redux-saga",
