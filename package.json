@@ -1,8 +1,11 @@
 {
   "name": "redux-saga-test-engine",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Redux saga test helper",
   "engines": {
+    "node": ">=6.0.0"
+  },
+  "engine": {
     "node": ">=6.0.0"
   },
   "main": "build/index.js",
@@ -14,9 +17,6 @@
     "lint": "eslint ./src ./tests",
     "build": "rimraf build && cross-env BABEL_ENV=es babel src -d build --ignore 'tests'",
     "prepublish": "npm run build"
-  },
-  "engine": {
-    "node": ">=6.0.0"
   },
   "keywords": [
     "redux",
@@ -33,7 +33,7 @@
     "babel-cli": "^6.24.1",
     "babel-core": "^6.24.1",
     "babel-eslint": "^7.1.1",
-    "babel-preset-env": "^1.4.0",
+    "babel-preset-env": "^1.5.2",
     "cross-env": "^4.0.0",
     "eslint": "^3.13.0",
     "redux-saga": "^0.14.1",
