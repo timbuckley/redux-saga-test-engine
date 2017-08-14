@@ -2,12 +2,6 @@
   "name": "redux-saga-test-engine",
   "version": "2.0.3",
   "description": "Redux saga test helper",
-  "engines": {
-    "node": ">=6.0.0"
-  },
-  "engine": {
-    "node": ">=6.0.0"
-  },
   "main": "build/index.js",
   "repository": "DNAinfo/redux-saga-test-engine",
   "scripts": {
