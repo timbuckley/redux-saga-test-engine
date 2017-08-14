@@ -18,11 +18,12 @@ const isNestedArray = arr =>
 
 const isMap = m => bool(Object.prototype.toString.call(m) === '[object Map]')
 
-// check if consumer is yielding our effect to immediatly cause the generator function to throw an error
-const shouldThrowError = obj =>
-  bool(obj && Object.keys(obj).includes('@@redux-saga-test-engine/ERROR'))
+const throwErrorKey = '@@redux-saga-test-engine/ERROR'
 
-const throwError = message => ({ '@@redux-saga-test-engine/ERROR': message })
+// check if consumer is yielding our effect to immediatly cause the generator function to throw an error
+const shouldThrowError = obj => bool(obj && Object.keys(obj).includes(throwErrorKey))
+
+const throwError = message => ({ [throwErrorKey]: message })
 
 // Lifted from https://github.com/tj/co/blob/717b043371ba057cb7a4a2a4e47120d598116ed7/index.js#L221
 function isGeneratorFunction(obj) {
@@ -126,7 +127,7 @@ function sagaTestEngine(effects, genFunc, envMapping, ...initialArgs) {
     )
 
     if (throwError) {
-      genResult = gen.throw('ERROR')
+      genResult = gen.throw(nextVal[throwErrorKey] || 'ERROR')
     } else {
       genResult = gen.next(nextVal)
     }
