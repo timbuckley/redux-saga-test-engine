@@ -2,3 +2,6 @@ test:
   override:
     - nvm install stable && nvm alias default stable
     - npm test
+machine:
+  node:
+    version: 6.0.0
