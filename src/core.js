@@ -44,16 +44,22 @@ function assert(condition, message) {
 
 // Returns value in mapping corresponding to matching searchVal key.
 function getNextVal(searchVal, mapping) {
+  let value
   if (isMap(mapping)) {
-    for (let [key, value] of mapping.entries()) {
+    for (let [key, val] of mapping.entries()) {
       if (deepEqual(key, searchVal)) {
-        return value
+        value = val
+        break
       }
     }
-    return undefined
   } else {
-    return (mapping.find(keyVal => deepEqual(keyVal[0], searchVal)) || [])[1]
+    value = (mapping.find(keyVal => deepEqual(keyVal[0], searchVal)) || [])[1]
   }
+
+  if (typeof value === 'function') {
+    return value()
+  }
+  return value
 }
 
 // Used to stringify yielded values. Output includes functions
@@ -72,6 +78,15 @@ function stringifyVal(val) {
     },
     2
   )
+}
+
+const stub = (genFunc, ...args) => {
+  if (isGeneratorFunction(genFunc)) {
+    const gen = genFunc(...args)
+    return () => gen.next().value
+  } else {
+    return () => genFunc(...args)
+  }
 }
 
 // Creates sagaTestEngine that collects yielded effects specified by the effects argument
@@ -141,4 +156,5 @@ module.exports = {
   stringifyVal,
   throwError,
   shouldThrowError,
+  stub,
 }

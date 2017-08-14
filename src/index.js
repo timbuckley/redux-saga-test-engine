@@ -6,6 +6,7 @@ const {
   collectCallsAndPuts,
   createSagaTestEngine,
   throwError,
+  stub,
 } = require('./core')
 
 module.exports = {
@@ -15,4 +16,5 @@ module.exports = {
   collectCalls,
   collectCallsAndPuts,
   throwError,
+  stub,
 }
