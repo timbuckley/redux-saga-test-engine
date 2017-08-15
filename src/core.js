@@ -90,6 +90,8 @@ const stub = (genFunc, ...args) => {
   }
 }
 
+const MAX_STEPS = 1000
+
 // Creates sagaTestEngine that collects yielded effects specified by the effects argument
 const createSagaTestEngine = (effects = ['PUT']) => (...args) => sagaTestEngine(effects, ...args)
 
@@ -97,17 +99,27 @@ const collectPuts = createSagaTestEngine(['PUT'])
 const collectCalls = createSagaTestEngine(['CALL'])
 const collectCallsAndPuts = createSagaTestEngine(['CALL', 'PUT'])
 
-function sagaTestEngine(effects, genFunc, envMapping, ...initialArgs) {
+function sagaTestEngine(effects, genFunc, opts, ...initialArgs) {
   assert(isGeneratorFunction(genFunc), 'The first parameter must be a generator function.')
+
+  let options = opts
+  if (isMap(opts) || isNestedArray(opts)) {
+    options = { mapping: opts }
+  } else {
+    options = opts
+  }
+
+  const envMapping = options.mapping
+  const collectedEffects = options.collected || []
+
   assert(
     isMap(envMapping) || isNestedArray(envMapping),
-    'The second parameter must be a nested array or Map.'
+    'The second parameter must be a nested array, Map or object containing the same under `mapping` key'
   )
 
   const mapping = [...envMapping, [undefined, undefined]]
   const gen = genFunc(...initialArgs)
   let val = undefined
-  let collectedEffects = []
   let isDone = false
   let counter = 0
 
@@ -139,6 +151,10 @@ function sagaTestEngine(effects, genFunc, envMapping, ...initialArgs) {
       collectedEffects.push(val)
     }
     counter += 1
+
+    if (counter > (options.maxSteps || MAX_STEPS)) {
+      throw new Error(`Exceeded maxSteps(${options.maxSteps || MAX_STEPS}) limit`)
+    }
   }
   return collectedEffects
 }

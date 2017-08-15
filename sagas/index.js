@@ -28,6 +28,20 @@ function* favSagaWorker(action) {
   }
 }
 
+function* throwFavSagaWorker(action) {
+  const { itemId } = action.payload
+  const { token, user } = yield select(getGlobalState)
+
+  try {
+    const response = yield call(favItem, itemId, token)
+    const json = yield response.json()
+    yield put(sucessfulFavItemAction(json, itemId, user))
+  } catch (e) {
+    yield put(receivedFavItemErrorAction(e, itemId))
+    throw e
+  }
+}
+
 function* retryFavSagaWorker(action) {
   const { itemId } = action.payload
   const { token, user } = yield select(getGlobalState)
@@ -62,6 +76,7 @@ function* sagaWithNestedSaga(action) {
 
 module.exports = {
   favSagaWorker,
+  throwFavSagaWorker,
   retryFavSagaWorker,
   sagaWithNoPuts,
   sagaWithNestedSaga,
