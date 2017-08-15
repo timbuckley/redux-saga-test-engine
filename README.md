@@ -78,7 +78,7 @@ function* retryFavSagaWorker(action) {
     try {
       const response = yield call(favItem, itemId, token)
       const json = yield response.json()
-      yield put(sucessfulFavItemAction(json, itemId, user))
+      yield put(successfulFavItemAction(json, itemId, user))
       break
     } catch (e) {
       yield put(receivedFavItemErrorAction(e, itemId))
@@ -96,7 +96,7 @@ const {
   retryFavSagaWorker,
   getGlobalState,
   favItem,
-  sucessfulFavItemAction,
+  successfulFavItemAction,
   receivedFavItemErrorAction,
 } = require('../sagas')
 
@@ -131,13 +131,13 @@ test('retryFavSagaWorker', t => {
   const actual = collectPuts((retryFavSagaWorker), ENV, FAV_ACTION)
   const expected = [
     put(receivedFavItemErrorAction(favItemRespFail, itemId)),
-    put(sucessfulFavItemAction(favItemResp, itemId, user)),
+    put(successfulFavItemAction(favItemResp, itemId, user)),
   ]
 
   t.deepEqual(
     actual,
     expected,
-    'We should see the `receivedFavItemErrorAction` and `sucessfulFavItemAction` dispatched with the correct information'
+    'We should see the `receivedFavItemErrorAction` and `successfulFavItemAction` dispatched with the correct information'
   )
 })
 ```
