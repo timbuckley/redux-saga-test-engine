@@ -1,43 +1,34 @@
 'use strict'
 const deepEqual = require('deep-equal')
 
-
 const bool = o => !!o
 
-const isEffect = (obj, effects = []) => bool(
-  obj &&
-  Object.keys(obj).some((key) => effects.includes(key))
-)
+const isEffect = (obj, effects = []) =>
+  bool(obj && Object.keys(obj).some(key => effects.includes(key)))
 
-const isNestedEffect = (arr, effects = []) => bool(
-  arr &&
-  arr.every &&
-  arr.length > 0 &&
-  arr.every(element => isEffect(element, effects))
-)
+const isNestedEffect = (arr, effects = []) =>
+  bool(arr && arr.every && arr.length > 0 && arr.every(element => isEffect(element, effects)))
 
-const isNestedArray = arr => bool(
-  arr &&
-  arr.every && // Is an array
-  arr.every(subArr => subArr.length === 2) // Every array inside has exactly 2 elements.
-)
+const isNestedArray = arr =>
+  bool(
+    arr &&
+    arr.every && // Is an array
+      arr.every(subArr => subArr.length === 2) // Every array inside has exactly 2 elements.
+  )
 
 const isMap = m => bool(Object.prototype.toString.call(m) === '[object Map]')
 
 // check if consumer is yielding our effect to immediatly cause the generator function to throw an error
-const shouldThrowError = obj => bool(obj && Object.keys(obj)
-  .includes('@@redux-saga-test-engine/ERROR'))
+const shouldThrowError = obj =>
+  bool(obj && Object.keys(obj).includes('@@redux-saga-test-engine/ERROR'))
 
 const throwError = message => ({ '@@redux-saga-test-engine/ERROR': message })
 
 // Lifted from https://github.com/tj/co/blob/717b043371ba057cb7a4a2a4e47120d598116ed7/index.js#L221
 function isGeneratorFunction(obj) {
-  const { constructor } = (obj || {})
+  const { constructor } = obj || {}
   if (!constructor) return false
-  if (
-    'GeneratorFunction' === constructor.name ||
-    'GeneratorFunction' === constructor.displayName
-  ) {
+  if ('GeneratorFunction' === constructor.name || 'GeneratorFunction' === constructor.displayName) {
     return true
   }
   return false
@@ -67,16 +58,20 @@ function getNextVal(searchVal, mapping) {
 
 // Used to stringify yielded values. Output includes functions
 function stringifyVal(val) {
-  return JSON.stringify(val, (key, val) => {
-    if (typeof val === 'function') {
-      if (val.name) {
-        return `[Function: ${val.name}]: ${val.toString()}`
-      } else {
-        return `[Function]: ${val.toString()}`
+  return JSON.stringify(
+    val,
+    (key, val) => {
+      if (typeof val === 'function') {
+        if (val.name) {
+          return `[Function: ${val.name}]: ${val.toString()}`
+        } else {
+          return `[Function]: ${val.toString()}`
+        }
       }
-    }
-    return val
-  }, 2)
+      return val
+    },
+    2
+  )
 }
 
 // Creates sagaTestEngine that collects yielded effects specified by the effects argument
@@ -87,12 +82,11 @@ const collectCalls = createSagaTestEngine(['CALL'])
 const collectCallsAndPuts = createSagaTestEngine(['CALL', 'PUT'])
 
 function sagaTestEngine(effects, genFunc, envMapping, ...initialArgs) {
-  assert(
-    isGeneratorFunction(genFunc),
-    'The first parameter must be a generator function.')
+  assert(isGeneratorFunction(genFunc), 'The first parameter must be a generator function.')
   assert(
     isMap(envMapping) || isNestedArray(envMapping),
-    'The second parameter must be a nested array or Map.')
+    'The second parameter must be a nested array or Map.'
+  )
 
   const mapping = [...envMapping, [undefined, undefined]]
   const gen = genFunc(...initialArgs)
@@ -112,8 +106,9 @@ function sagaTestEngine(effects, genFunc, envMapping, ...initialArgs) {
     const yieldedUndefined = val === undefined
     const yieldedEffectShouldBeCollected = isEffect(val, effects) || isNestedEffect(val, effects)
     assert(
-      (isFirstLoop || nextValFound || yieldedUndefined || yieldedEffectShouldBeCollected),
-      `Env Mapping is missing a value for ${stringifyVal(val)}`)
+      isFirstLoop || nextValFound || yieldedUndefined || yieldedEffectShouldBeCollected,
+      `Env Mapping is missing a value for ${stringifyVal(val)}`
+    )
 
     if (throwError) {
       genResult = gen.throw('ERROR')
