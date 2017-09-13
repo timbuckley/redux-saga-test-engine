@@ -53,7 +53,6 @@ test('isEffect correctly identifies a CALL or PUT Saga Effect', t => {
   t.true(isEffect({ CALL: 'someting' }, ['PUT', 'CALL']))
 })
 
-
 test('isNestedEffect correctly identifies an array of PUT Saga Effects', t => {
   t.false(isNestedEffect())
   t.false(isNestedEffect({}, ['PUT']))
@@ -100,7 +99,6 @@ test('isNestedEffect correctly identifies an array of PUT or CALL Saga Effects',
   t.false(isNestedEffect([call(() => 1), select(() => 1), put({})], ['PUT', 'CALL']))
 })
 
-
 test('isNestedArray correctly identifies a nested array', t => {
   t.false(isNestedArray())
   t.false(isNestedArray(1))
@@ -133,7 +131,6 @@ test('shouldThrowError correctly identifies a throw effect', t => {
   t.true(shouldThrowError({ '@@redux-saga-test-engine/ERROR': 'someting' }))
 })
 
-
 test('getNextVal', t => {
   // Nested Array
   t.is(2, getNextVal(1, [[1, 2]]))
@@ -141,22 +138,12 @@ test('getNextVal', t => {
   t.is(4, getNextVal(3, [[1, 2], [3, 4]]))
   t.is(
     'val',
-    getNextVal(
-      { a: { b: { c: 1 } } },
-      [
-        [{ a: { b: { c: 1 } } }, 'val'],
-      ]
-    ),
+    getNextVal({ a: { b: { c: 1 } } }, [[{ a: { b: { c: 1 } } }, 'val']]),
     'Handled deeply-nested objects in arrays'
   )
   t.is(
     undefined,
-    getNextVal(
-      { a: { b: { c: 2 } } },
-      [
-        [{ a: { b: { c: 1 } } }, 'val'],
-      ]
-    ),
+    getNextVal({ a: { b: { c: 2 } } }, [[{ a: { b: { c: 1 } } }, 'val']]),
     'Handled deeply-nested objects in arrays part 2'
   )
 
@@ -165,22 +152,12 @@ test('getNextVal', t => {
   t.is(4, getNextVal(3, new Map([[1, 2], [3, 4]])))
   t.is(
     'val',
-    getNextVal(
-      { a: { b: { c: 1 } } },
-      new Map([
-        [{ a: { b: { c: 1 } } }, 'val'],
-      ])
-    ),
+    getNextVal({ a: { b: { c: 1 } } }, new Map([[{ a: { b: { c: 1 } } }, 'val']])),
     'Handled deeply-nested objects in Map'
   )
   t.is(
     undefined,
-    getNextVal(
-      { a: { b: { c: 2 } } },
-      new Map([
-        [{ a: { b: { c: 1 } } }, 'val'],
-      ])
-    ),
+    getNextVal({ a: { b: { c: 2 } } }, new Map([[{ a: { b: { c: 1 } } }, 'val']])),
     'Handled deeply-nested objects in Map part 2'
   )
 
@@ -194,64 +171,72 @@ test('getNextVal', t => {
 })
 
 test('sagaTestEngine throws under bad conditions', t => {
-  const genericGenFunc = function* () { }
+  const genericGenFunc = function*() {}
   const generator = genericGenFunc()
 
   // First assert.
-  t.throws(
-    () => sagaTestEngine(),
-    'The first parameter must be a generator function.')
-  t.throws(
-    () => sagaTestEngine(1),
-    'The first parameter must be a generator function.')
+  t.throws(() => sagaTestEngine(), 'The first parameter must be a generator function.')
+  t.throws(() => sagaTestEngine(1), 'The first parameter must be a generator function.')
   t.throws(
     () => sagaTestEngine(() => 1),
     'The first parameter must be a generator function.',
-    'Handled non-generator functions')
+    'Handled non-generator functions'
+  )
   t.throws(
     () => sagaTestEngine(generator),
     'The first parameter must be a generator function.',
-    'Cannot be a generator itself')
+    'Cannot be a generator itself'
+  )
 
   // Second assert.
   t.throws(
     () => sagaTestEngine(genericGenFunc, 1),
-    'The second parameter must be a nested array or Map.')
+    'The second parameter must be a nested array or Map.'
+  )
   t.throws(
     () => sagaTestEngine(genericGenFunc, [1]),
-    'The second parameter must be a nested array or Map.')
+    'The second parameter must be a nested array or Map.'
+  )
 
   // Third assert.
-  const f = function* () {
+  const f = function*() {
     yield 'key'
   }
   const badMapping = [['incorrect key', 'value']]
-  t.throws(
-    () => sagaTestEngine(f, badMapping),
-    'Env Mapping is missing a value for "key"')
+  t.throws(() => sagaTestEngine(f, badMapping), 'Env Mapping is missing a value for "key"')
 
   // Bad mapping for saga that yields obj with anonymous function
-  function namedFunction() { }
-  const f2 = function* () {
+  function namedFunction() {}
+  const f2 = function*() {
     yield { func: namedFunction }
   }
   const badMapping2 = [['bad', 'mapping']]
   t.throws(
     () => sagaTestEngine(f2, badMapping2),
-    `Env Mapping is missing a value for ${JSON.stringify({ "func": `[Function: namedFunction]: ${namedFunction.toString()}` }, null, 2)}`
+    `Env Mapping is missing a value for ${JSON.stringify(
+      { func: `[Function: namedFunction]: ${namedFunction.toString()}` },
+      null,
+      2
+    )}`
   )
 
   // Bad mapping for saga that yields object with anonymous function
-  const anonymousFunction = function () { return 'something' }
+  const anonymousFunction = function() {
+    return 'something'
+  }
   // Skip the anonymous function test if this anonymous functon is named (done in newer node versions)
   if (!anonymousFunction.name) {
-    const f3 = function* () {
+    const f3 = function*() {
       yield { func: anonymousFunction }
     }
     const badMapping3 = [['bad', 'mapping']]
     t.throws(
       () => sagaTestEngine(f3, badMapping3),
-      `Env Mapping is missing a value for ${JSON.stringify({ func: `[Function]: ${anonymousFunction.toString()}` }, null, 2)}`
+      `Env Mapping is missing a value for ${JSON.stringify(
+        { func: `[Function]: ${anonymousFunction.toString()}` },
+        null,
+        2
+      )}`
     )
   }
 
@@ -259,64 +244,46 @@ test('sagaTestEngine throws under bad conditions', t => {
   const goodMapping = [['key', 'value']]
   t.notThrows(() => sagaTestEngine(f, goodMapping))
 
-  const f4 = function* () {
+  const f4 = function*() {
     yield 'key1'
     yield 'key2'
   }
   const goodMapping2 = [['key1', 'value1'], ['key2', 'value2']]
   t.notThrows(() => sagaTestEngine(f4, goodMapping2))
 
-  const f5 = function* () {
+  const f5 = function*() {
     yield undefined
   }
   const goodMapping3 = [[undefined, undefined]]
   t.notThrows(() => sagaTestEngine(f5, goodMapping3))
 
-  const f6 = function* () {
+  const f6 = function*() {
     yield [put({ a: 1 })]
   }
-  t.notThrows(
-    () => sagaTestEngine(f6, goodMapping3),
-    'Correctly handles nested array of puts'
-  )
+  t.notThrows(() => sagaTestEngine(f6, goodMapping3), 'Correctly handles nested array of puts')
 
-  const f7 = function* () {
+  const f7 = function*() {
     yield [select(() => 1)]
   }
   t.throws(() => sagaTestEngine(f7, goodMapping3))
 })
 
-
 test('sagaTestEngine correctly handles array of PUTS', t => {
   const selectorFunc = () => 2
   function* sagaWithNestedPuts() {
     const someString = yield select(selectorFunc)
-    yield [
-      put({ a: 1 }),
-      put({ b: 2 }),
-      put({ c: someString }),
-    ]
+    yield [put({ a: 1 }), put({ b: 2 }), put({ c: someString })]
     yield put('another put')
   }
 
-  const envMapping = [
-    [select(selectorFunc), 'someString'],
-  ]
+  const envMapping = [[select(selectorFunc), 'someString']]
 
   t.deepEqual(
     sagaTestEngine(sagaWithNestedPuts, envMapping),
-    [
-      [
-        put({ a: 1 }),
-        put({ b: 2 }),
-        put({ c: 'someString' }),
-      ],
-      put('another put'),
-    ],
+    [[put({ a: 1 }), put({ b: 2 }), put({ c: 'someString' })], put('another put')],
     'Result is a nested array of puts.'
   )
 })
-
 
 test('Example favSagaWorker with happy path works', t => {
   const itemId = '123'
@@ -344,14 +311,17 @@ test('Example favSagaWorker with happy path works', t => {
   )
 })
 
-
 test('Example favSagaWorker with sad path works', t => {
   const itemId = '123'
   const token = '456'
   const user = { id: '321' }
 
   const favItemRespFail = new TypeError('TypeError: response.json is not a function')
-  const favItemRespObjFail = { json: () => { throw favItemRespFail } }
+  const favItemRespObjFail = {
+    json: () => {
+      throw favItemRespFail
+    },
+  }
 
   const FAV_ACTION = {
     type: 'FAV_ITEM_REQUESTED',
@@ -370,7 +340,6 @@ test('Example favSagaWorker with sad path works', t => {
     'Not happy path'
   )
 })
-
 
 test('Example favSagaWorker with throwError effect follows sad path', t => {
   const itemId = '123'
@@ -394,7 +363,6 @@ test('Example favSagaWorker with throwError effect follows sad path', t => {
     'Not happy path'
   )
 })
-
 
 test('favSagaWorker works when given a Map', t => {
   const itemId = '123'
@@ -456,9 +424,7 @@ test('collectCalls finds CALLs from saga', t => {
   const token = '456'
   const user = { id: '321' }
 
-  const ENV = [
-    [select(getGlobalState), { user, token }],
-  ]
+  const ENV = [[select(getGlobalState), { user, token }]]
 
   t.deepEqual(
     collectCalls(sagaWithNoPuts, ENV),
@@ -488,10 +454,7 @@ test('collectCallsAndPuts finds CALLs and PUTs from saga', t => {
 
   t.deepEqual(
     collectCallsAndPuts(favSagaWorker, ENV, FAV_ACTION),
-    [
-      call(favItem, itemId, token),
-      put(sucessfulFavItemAction(favItemResp, itemId, user)),
-    ],
+    [call(favItem, itemId, token), put(sucessfulFavItemAction(favItemResp, itemId, user))],
     'Collected call and put effects from saga'
   )
 })
