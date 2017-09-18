@@ -18,11 +18,12 @@ const isNestedArray = arr =>
 
 const isMap = m => bool(Object.prototype.toString.call(m) === '[object Map]')
 
-// check if consumer is yielding our effect to immediatly cause the generator function to throw an error
-const shouldThrowError = obj =>
-  bool(obj && Object.keys(obj).includes('@@redux-saga-test-engine/ERROR'))
+const throwErrorKey = '@@redux-saga-test-engine/ERROR'
 
-const throwError = message => ({ '@@redux-saga-test-engine/ERROR': message })
+// check if consumer is yielding our effect to immediatly cause the generator function to throw an error
+const shouldThrowError = obj => bool(obj && Object.keys(obj).includes(throwErrorKey))
+
+const throwError = message => ({ [throwErrorKey]: message })
 
 // Lifted from https://github.com/tj/co/blob/717b043371ba057cb7a4a2a4e47120d598116ed7/index.js#L221
 function isGeneratorFunction(obj) {
@@ -44,16 +45,22 @@ function assert(condition, message) {
 
 // Returns value in mapping corresponding to matching searchVal key.
 function getNextVal(searchVal, mapping) {
+  let value
   if (isMap(mapping)) {
-    for (let [key, value] of mapping.entries()) {
+    for (let [key, val] of mapping.entries()) {
       if (deepEqual(key, searchVal)) {
-        return value
+        value = val
+        break
       }
     }
-    return undefined
   } else {
-    return (mapping.find(keyVal => deepEqual(keyVal[0], searchVal)) || [])[1]
+    value = (mapping.find(keyVal => deepEqual(keyVal[0], searchVal)) || [])[1]
   }
+
+  if (typeof value === 'function') {
+    return value()
+  }
+  return value
 }
 
 // Used to stringify yielded values. Output includes functions
@@ -72,6 +79,15 @@ function stringifyVal(val) {
     },
     2
   )
+}
+
+const stub = (genFunc, ...args) => {
+  if (isGeneratorFunction(genFunc)) {
+    const gen = genFunc(...args)
+    return () => gen.next().value
+  } else {
+    return () => genFunc(...args)
+  }
 }
 
 // Creates sagaTestEngine that collects yielded effects specified by the effects argument
@@ -111,7 +127,7 @@ function sagaTestEngine(effects, genFunc, envMapping, ...initialArgs) {
     )
 
     if (throwError) {
-      genResult = gen.throw('ERROR')
+      genResult = gen.throw(nextVal[throwErrorKey] || 'ERROR')
     } else {
       genResult = gen.next(nextVal)
     }
@@ -141,4 +157,5 @@ module.exports = {
   stringifyVal,
   throwError,
   shouldThrowError,
+  stub,
 }

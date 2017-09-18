@@ -68,16 +68,21 @@ actualEffects
 
 ```js
 // favSaga.js
-function* favSagaWorker(action) {
+function* retryFavSagaWorker(action) {
   const { itemId } = action.payload
   const { token, user } = yield select(getGlobalState)
 
-  try {
-    const response = yield call(favItem, itemId, token)
-    const json = yield response.json()
-    yield put(sucessfulFavItemAction(json, itemId, user))
-  } catch (e) {
-    yield put(receivedFavItemErrorAction(e, itemId))
+  let attempt = 0
+  while (attempt++ < 5) {
+    try {
+      const response = yield call(favItem, itemId, token)
+      const json = yield response.json()
+      yield put(sucessfulFavItemAction(json, itemId, user))
+      break
+    } catch (e) {
+      yield put(receivedFavItemErrorAction(e, itemId))
+      yield call(delay, 2000)
+    }
   }
 }
 ```
@@ -85,24 +90,28 @@ function* favSagaWorker(action) {
 ```js
 // favSaga.spec.js
 const test = require('ava')
-const { collectPuts } = require('redux-saga-test-engine')
+const { collectPuts, stub, throwError } = require('redux-saga-test-engine')
 const {
-  favSagaWorker,
+  retryFavSagaWorker,
   getGlobalState,
   favItem,
   sucessfulFavItemAction,
+  receivedFavItemErrorAction,
 } = require('../sagas')
 
+const { delay } = require('redux-saga')
 const { select, call, put } = require('redux-saga/effects')
 
-test('favSagaWorker', t => {
+test('retryFavSagaWorker', t => {
   const itemId = '123'
   const token = '456'
-  const user = {id: '321'}
+  const user = { id: '321' }
 
   const favItemResp = 'The favItem JSON response'
-  const favItemRespOBj = { json: () => favItemResp }
+  const favItemRespObj = { json: () => favItemResp }
 
+  const favItemRespFail = new TypeError('TypeError: response.json is not a function')
+  const favItemRespObjFail = { json: () => { throw favItemRespFail } }
 
   const FAV_ACTION = {
     type: 'FAV_ITEM_REQUESTED',
@@ -111,21 +120,26 @@ test('favSagaWorker', t => {
 
   const ENV = [
     [select(getGlobalState), { user, token }],
-    [call(favItem, itemId, token), favItemRespOBj],
-    [favItemResp, favItemResp],
+    [call(favItem, itemId, token), stub(function* () {
+      yield favItemRespObjFail
+      yield favItemRespObj
+    })],
+    [call(delay, 2000), '__elapsed__']
   ]
 
-  const actual = collectPuts((favSagaWorker), ENV, FAV_ACTION)
-  const expected = [put(sucessfulFavItemAction(favItemResp, itemId, user))]
+  const actual = collectPuts((retryFavSagaWorker), ENV, FAV_ACTION)
+  const expected = [
+    put(receivedFavItemErrorAction(favItemRespFail, itemId)),
+    put(sucessfulFavItemAction(favItemResp, itemId, user)),
+  ]
 
   t.deepEqual(
     actual,
     expected,
-    'We should see the `sucessfulFavItemAction` dispatched with the correct information'
+    'We should see the `receivedFavItemErrorAction` and `sucessfulFavItemAction` dispatched with the correct information'
   )
 })
 ```
-
 
 ## API
 
@@ -146,6 +160,11 @@ const {
   // when the corresponding effect is found in the saga. If inside a try-catch,
   // the argument provided to throwError will be passed to the catch function.
   throwError,
+
+  // Helper method.
+  // When used as value in the mapping can return different values on each call,
+  // defined by passed generator function.
+  stub,
 } = require('redux-saga-test-engine')
 ```
 

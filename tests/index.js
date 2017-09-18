@@ -11,9 +11,11 @@ const {
   isNestedEffect,
   throwError,
   shouldThrowError,
+  stub,
 } = require('../src/core')
 const {
   favSagaWorker,
+  retryFavSagaWorker,
   sagaWithNoPuts,
   sagaWithNestedSaga,
   getGlobalState,
@@ -22,6 +24,8 @@ const {
   receivedFavItemErrorAction,
   loadingFavItemAction,
 } = require('../sagas')
+
+const { delay } = require('redux-saga')
 const { select, call, put } = require('redux-saga/effects')
 
 const sagaTestEngine = collectPuts
@@ -147,6 +151,35 @@ test('getNextVal', t => {
     'Handled deeply-nested objects in arrays part 2'
   )
 
+  // Nested Array with simple stubs
+  t.is(2, getNextVal(1, [[1, () => 2]]))
+  t.is(2, getNextVal(1, [[1, () => 2], [1, () => 3]]))
+  t.is(4, getNextVal(3, [[1, () => 2], [3, () => 4]]))
+  t.is(
+    'val',
+    getNextVal({ a: { b: { c: 1 } } }, [[{ a: { b: { c: 1 } } }, () => 'val']]),
+    'Handled deeply-nested objects in arrays with simple stubs'
+  )
+  t.is(
+    undefined,
+    getNextVal({ a: { b: { c: 2 } } }, [[{ a: { b: { c: 1 } } }, () => 'val']]),
+    'Handled deeply-nested objects in arrays part 2 with simple stubs'
+  )
+
+  // Nested Array with generator stubs
+  const stub1 = stub(function*() {
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      yield 2
+      yield 3
+      yield 4
+    }
+  })
+
+  t.is(2, getNextVal(1, [[1, stub1]]), 'Handle generator stub call 1')
+  t.is(3, getNextVal(1, [[1, stub1]]), 'Handle generator stub call 2')
+  t.is(4, getNextVal(1, [[1, stub1]]), 'Handle generator stub call 3')
+
   // Map
   t.is(2, getNextVal(1, new Map([[1, 2]])))
   t.is(4, getNextVal(3, new Map([[1, 2], [3, 4]])))
@@ -159,6 +192,20 @@ test('getNextVal', t => {
     undefined,
     getNextVal({ a: { b: { c: 2 } } }, new Map([[{ a: { b: { c: 1 } } }, 'val']])),
     'Handled deeply-nested objects in Map part 2'
+  )
+
+  // Map with simple stubs
+  t.is(2, getNextVal(1, new Map([[1, () => 2]])))
+  t.is(4, getNextVal(3, new Map([[1, () => 2], [3, () => 4]])))
+  t.is(
+    'val',
+    getNextVal({ a: { b: { c: 1 } } }, new Map([[{ a: { b: { c: 1 } } }, () => 'val']])),
+    'Handled deeply-nested objects in Map with simple stubs'
+  )
+  t.is(
+    undefined,
+    getNextVal({ a: { b: { c: 2 } } }, new Map([[{ a: { b: { c: 1 } } }, () => 'val']])),
+    'Handled deeply-nested objects in Map part 2 with simple stubs'
   )
 
   // Handles value not found.
@@ -387,6 +434,51 @@ test('favSagaWorker works when given a Map', t => {
     sagaTestEngine(favSagaWorker, ENV, FAV_ACTION),
     [put(sucessfulFavItemAction(favItemResp, itemId, user))],
     'Maps work'
+  )
+})
+
+test('Example retryFavSagaWorker works', t => {
+  const itemId = '123'
+  const token = '456'
+  const user = { id: '321' }
+
+  const favItemResp = 'The favItem JSON response'
+  const favItemRespObj = { json: () => favItemResp }
+
+  const favItemRespFail = new TypeError('TypeError: response.json is not a function')
+  const favItemRespObjFail = {
+    json: () => {
+      throw favItemRespFail
+    },
+  }
+
+  const FAV_ACTION = {
+    type: 'FAV_ITEM_REQUESTED',
+    payload: { itemId },
+  }
+
+  const ENV = [
+    [select(getGlobalState), { user, token }],
+    [
+      call(favItem, itemId, token),
+      stub(function*() {
+        yield favItemRespObjFail
+        yield favItemRespObjFail
+        yield favItemRespObj
+      }),
+    ],
+    [call(delay, 2000), '__elapsed__'],
+    [favItemResp, favItemResp],
+  ]
+
+  t.deepEqual(
+    sagaTestEngine(retryFavSagaWorker, ENV, FAV_ACTION),
+    [
+      put(receivedFavItemErrorAction(favItemRespFail, itemId)),
+      put(receivedFavItemErrorAction(favItemRespFail, itemId)),
+      put(sucessfulFavItemAction(favItemResp, itemId, user)),
+    ],
+    '3 retries path'
   )
 })
 

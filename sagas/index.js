@@ -1,5 +1,6 @@
 'use strict'
 
+const { delay } = require('redux-saga')
 const { select, call, put } = require('redux-saga/effects')
 // ------------ Example ------------
 
@@ -27,6 +28,24 @@ function* favSagaWorker(action) {
   }
 }
 
+function* retryFavSagaWorker(action) {
+  const { itemId } = action.payload
+  const { token, user } = yield select(getGlobalState)
+
+  let attempt = 0
+  while (attempt++ < 5) {
+    try {
+      const response = yield call(favItem, itemId, token)
+      const json = yield response.json()
+      yield put(sucessfulFavItemAction(json, itemId, user))
+      break
+    } catch (e) {
+      yield put(receivedFavItemErrorAction(e, itemId))
+      yield call(delay, 2000)
+    }
+  }
+}
+
 function* sagaWithNoPuts() {
   const { token, user } = yield select(getGlobalState)
 
@@ -43,6 +62,7 @@ function* sagaWithNestedSaga(action) {
 
 module.exports = {
   favSagaWorker,
+  retryFavSagaWorker,
   sagaWithNoPuts,
   sagaWithNestedSaga,
   getGlobalState,
