@@ -13,8 +13,10 @@ const {
   shouldThrowError,
   stub,
 } = require('../src/core')
+
 const {
   favSagaWorker,
+  throwFavSagaWorker,
   retryFavSagaWorker,
   sagaWithNoPuts,
   sagaWithNestedSaga,
@@ -238,11 +240,11 @@ test('sagaTestEngine throws under bad conditions', t => {
   // Second assert.
   t.throws(
     () => sagaTestEngine(genericGenFunc, 1),
-    'The second parameter must be a nested array or Map.'
+    'The second parameter must be a nested array, Map or object containing the same under `mapping` key'
   )
   t.throws(
     () => sagaTestEngine(genericGenFunc, [1]),
-    'The second parameter must be a nested array or Map.'
+    'The second parameter must be a nested array, Map or object containing the same under `mapping` key'
   )
 
   // Third assert.
@@ -409,6 +411,58 @@ test('Example favSagaWorker with throwError effect follows sad path', t => {
     [put(receivedFavItemErrorAction(errorMsg, itemId))],
     'Not happy path'
   )
+})
+
+test('Example throwFavSagaWorker with throwError effect follows sad path', t => {
+  const itemId = '123'
+  const token = '456'
+  const user = { id: '321' }
+  const errorMsg = 'ERROR'
+
+  const FAV_ACTION = {
+    type: 'FAV_ITEM_REQUESTED',
+    payload: { itemId },
+  }
+
+  const ENV = [
+    [select(getGlobalState), { user, token }],
+    [call(favItem, itemId, token), throwError(errorMsg)],
+  ]
+
+  const options = {
+    mapping: ENV,
+    collected: [],
+  }
+
+  t.throws(() => {
+    sagaTestEngine(throwFavSagaWorker, options, FAV_ACTION)
+  })
+
+  t.deepEqual(
+    options.collected,
+    [put(receivedFavItemErrorAction(errorMsg, itemId))],
+    'Not happy path'
+  )
+})
+
+test('Endless cycle saga', t => {
+  function* endlessSaga() {
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      yield put({ type: 'HEARTBEAT' })
+      yield call(delay, 1000)
+    }
+  }
+
+  const options = {
+    mapping: [[call(delay, 1000), '__elapsed__']],
+    collected: [],
+    maxSteps: 100,
+  }
+
+  t.throws(() => {
+    sagaTestEngine(endlessSaga, options)
+  }, 'Exceeded maxSteps(100) limit')
 })
 
 test('favSagaWorker works when given a Map', t => {
