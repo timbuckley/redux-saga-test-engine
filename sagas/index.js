@@ -10,7 +10,7 @@ const getGlobalState = () => ({
 })
 
 const favItem = () => ({})
-const sucessfulFavItemAction = (...args) => args
+const successfulFavItemAction = (...args) => args
 const receivedFavItemErrorAction = (...args) => args
 const loadingFavItemAction = (...args) => args
 
@@ -22,7 +22,7 @@ function* favSagaWorker(action) {
   try {
     const response = yield call(favItem, itemId, token)
     const json = yield response.json()
-    yield put(sucessfulFavItemAction(json, itemId, user))
+    yield put(successfulFavItemAction(json, itemId, user))
   } catch (e) {
     yield put(receivedFavItemErrorAction(e, itemId))
   }
@@ -35,7 +35,7 @@ function* throwFavSagaWorker(action) {
   try {
     const response = yield call(favItem, itemId, token)
     const json = yield response.json()
-    yield put(sucessfulFavItemAction(json, itemId, user))
+    yield put(successfulFavItemAction(json, itemId, user))
   } catch (e) {
     yield put(receivedFavItemErrorAction(e, itemId))
     throw e
@@ -51,7 +51,7 @@ function* retryFavSagaWorker(action) {
     try {
       const response = yield call(favItem, itemId, token)
       const json = yield response.json()
-      yield put(sucessfulFavItemAction(json, itemId, user))
+      yield put(successfulFavItemAction(json, itemId, user))
       break
     } catch (e) {
       yield put(receivedFavItemErrorAction(e, itemId))
@@ -82,7 +82,7 @@ module.exports = {
   sagaWithNestedSaga,
   getGlobalState,
   favItem,
-  sucessfulFavItemAction,
+  successfulFavItemAction,
   receivedFavItemErrorAction,
   loadingFavItemAction,
 }

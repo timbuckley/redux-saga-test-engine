@@ -114,7 +114,8 @@ function sagaTestEngine(effects, genFunc, opts, ...initialArgs) {
 
   assert(
     isMap(envMapping) || isNestedArray(envMapping),
-    'The second parameter must be a nested array, Map or object containing the same under `mapping` key'
+    'The second parameter must be a nested array, ' +
+      'Map or object containing the same under `mapping` key'
   )
 
   const mapping = [...envMapping, [undefined, undefined]]

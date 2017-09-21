@@ -22,7 +22,7 @@ const {
   sagaWithNestedSaga,
   getGlobalState,
   favItem,
-  sucessfulFavItemAction,
+  successfulFavItemAction,
   receivedFavItemErrorAction,
   loadingFavItemAction,
 } = require('../sagas')
@@ -40,10 +40,10 @@ test('isEffect correctly identifies a PUT Saga Effect', t => {
   t.false(isEffect(select, ['PUT']))
   t.false(isEffect(call(() => 'call'), ['PUT']))
   t.false(isEffect(select(() => 'select'), ['PUT']))
-  t.false(isEffect({ CALL: 'someting' }, ['PUT']))
+  t.false(isEffect({ CALL: 'something' }, ['PUT']))
 
   t.true(isEffect(put({}), ['PUT']))
-  t.true(isEffect({ PUT: 'someting' }, ['PUT']))
+  t.true(isEffect({ PUT: 'something' }, ['PUT']))
 })
 
 test('isEffect correctly identifies a CALL or PUT Saga Effect', t => {
@@ -51,12 +51,12 @@ test('isEffect correctly identifies a CALL or PUT Saga Effect', t => {
   t.false(isEffect(call, ['PUT', 'CALL']))
   t.false(isEffect(select, ['PUT', 'CALL']))
   t.false(isEffect(select(() => 'select'), ['PUT', 'CALL']))
-  t.false(isEffect({ CALL: 'someting' }, ['PUT']))
+  t.false(isEffect({ CALL: 'something' }, ['PUT']))
 
   t.true(isEffect(call(() => 'call'), ['PUT', 'CALL']))
   t.true(isEffect(put({}), ['PUT', 'CALL']))
-  t.true(isEffect({ PUT: 'someting' }, ['PUT', 'CALL']))
-  t.true(isEffect({ CALL: 'someting' }, ['PUT', 'CALL']))
+  t.true(isEffect({ PUT: 'something' }, ['PUT', 'CALL']))
+  t.true(isEffect({ CALL: 'something' }, ['PUT', 'CALL']))
 })
 
 test('isNestedEffect correctly identifies an array of PUT Saga Effects', t => {
@@ -68,11 +68,11 @@ test('isNestedEffect correctly identifies an array of PUT Saga Effects', t => {
   t.false(isNestedEffect(select, ['PUT']))
   t.false(isNestedEffect(call(() => 'call'), ['PUT']))
   t.false(isNestedEffect(select(() => 'select'), ['PUT']))
-  t.false(isNestedEffect({ CALL: 'someting' }, ['PUT']))
+  t.false(isNestedEffect({ CALL: 'something' }, ['PUT']))
   t.false(isNestedEffect(put({}), ['PUT']))
-  t.false(isNestedEffect({ PUT: 'someting' }), ['PUT'])
+  t.false(isNestedEffect({ PUT: 'something' }), ['PUT'])
 
-  t.true(isNestedEffect([{ PUT: 'someting' }], ['PUT']))
+  t.true(isNestedEffect([{ PUT: 'something' }], ['PUT']))
   t.true(isNestedEffect([put({})], ['PUT']))
   t.true(isNestedEffect([put({}), put({}), put({})], ['PUT']))
 
@@ -89,14 +89,14 @@ test('isNestedEffect correctly identifies an array of PUT or CALL Saga Effects',
   t.false(isNestedEffect(select, ['PUT', 'CALL']))
   t.false(isNestedEffect(call(() => 'call'), ['PUT', 'CALL']))
   t.false(isNestedEffect(select(() => 'select'), ['PUT', 'CALL']))
-  t.false(isNestedEffect({ CALL: 'someting' }, ['PUT', 'CALL']))
+  t.false(isNestedEffect({ CALL: 'something' }, ['PUT', 'CALL']))
   t.false(isNestedEffect(put({}), ['PUT', 'CALL']))
-  t.false(isNestedEffect({ PUT: 'someting' }), ['PUT', 'CALL'])
+  t.false(isNestedEffect({ PUT: 'something' }), ['PUT', 'CALL'])
 
-  t.true(isNestedEffect([{ PUT: 'someting' }], ['PUT', 'CALL']))
+  t.true(isNestedEffect([{ PUT: 'something' }], ['PUT', 'CALL']))
   t.true(isNestedEffect([put({})], ['PUT', 'CALL']))
   t.true(isNestedEffect([put({}), put({}), put({})], ['PUT', 'CALL']))
-  t.true(isNestedEffect([{ CALL: 'someting' }], ['PUT', 'CALL']))
+  t.true(isNestedEffect([{ CALL: 'something' }], ['PUT', 'CALL']))
   t.true(isNestedEffect([call(() => 1)], ['PUT', 'CALL']))
   t.true(isNestedEffect([call(() => 1), put({}), put({})], ['PUT', 'CALL']))
   t.true(isNestedEffect([put({}), call(() => 1), put({})], ['PUT', 'CALL']))
@@ -129,12 +129,12 @@ test('shouldThrowError correctly identifies a throw effect', t => {
   t.false(shouldThrowError(select))
   t.false(shouldThrowError(call(() => 'call')))
   t.false(shouldThrowError(select(() => 'select')))
-  t.false(shouldThrowError({ CALL: 'someting' }))
+  t.false(shouldThrowError({ CALL: 'something' }))
   t.false(shouldThrowError(put({})))
-  t.false(shouldThrowError({ PUT: 'someting' }))
+  t.false(shouldThrowError({ PUT: 'something' }))
 
   t.true(shouldThrowError(throwError('error')))
-  t.true(shouldThrowError({ '@@redux-saga-test-engine/ERROR': 'someting' }))
+  t.true(shouldThrowError({ '@@redux-saga-test-engine/ERROR': 'something' }))
 })
 
 test('getNextVal', t => {
@@ -240,11 +240,13 @@ test('sagaTestEngine throws under bad conditions', t => {
   // Second assert.
   t.throws(
     () => sagaTestEngine(genericGenFunc, 1),
-    'The second parameter must be a nested array, Map or object containing the same under `mapping` key'
+    'The second parameter must be a nested array, ' +
+      'Map or object containing the same under `mapping` key'
   )
   t.throws(
     () => sagaTestEngine(genericGenFunc, [1]),
-    'The second parameter must be a nested array, Map or object containing the same under `mapping` key'
+    'The second parameter must be a nested array, ' +
+      'Map or object containing the same under `mapping` key'
   )
 
   // Third assert.
@@ -273,7 +275,7 @@ test('sagaTestEngine throws under bad conditions', t => {
   const anonymousFunction = function() {
     return 'something'
   }
-  // Skip the anonymous function test if this anonymous functon is named (done in newer node versions)
+  // Skip the anonymous function test if this anonymous function is named (done in newer node versions)
   if (!anonymousFunction.name) {
     const f3 = function*() {
       yield { func: anonymousFunction }
@@ -355,7 +357,7 @@ test('Example favSagaWorker with happy path works', t => {
 
   t.deepEqual(
     sagaTestEngine(favSagaWorker, ENV, FAV_ACTION),
-    [put(sucessfulFavItemAction(favItemResp, itemId, user))],
+    [put(successfulFavItemAction(favItemResp, itemId, user))],
     'Happy path'
   )
 })
@@ -486,7 +488,7 @@ test('favSagaWorker works when given a Map', t => {
 
   t.deepEqual(
     sagaTestEngine(favSagaWorker, ENV, FAV_ACTION),
-    [put(sucessfulFavItemAction(favItemResp, itemId, user))],
+    [put(successfulFavItemAction(favItemResp, itemId, user))],
     'Maps work'
   )
 })
@@ -530,7 +532,7 @@ test('Example retryFavSagaWorker works', t => {
     [
       put(receivedFavItemErrorAction(favItemRespFail, itemId)),
       put(receivedFavItemErrorAction(favItemRespFail, itemId)),
-      put(sucessfulFavItemAction(favItemResp, itemId, user)),
+      put(successfulFavItemAction(favItemResp, itemId, user)),
     ],
     '3 retries path'
   )
@@ -559,7 +561,7 @@ test('sagaTestEngine finds PUTs from yielded saga', t => {
     sagaTestEngine(sagaWithNestedSaga, ENV, FAV_ACTION),
     [
       put(loadingFavItemAction(true)),
-      put(sucessfulFavItemAction(favItemResp, itemId, user)),
+      put(successfulFavItemAction(favItemResp, itemId, user)),
       put(loadingFavItemAction(false)),
     ],
     'Actions dispatched from nested saga'
@@ -600,7 +602,7 @@ test('collectCallsAndPuts finds CALLs and PUTs from saga', t => {
 
   t.deepEqual(
     collectCallsAndPuts(favSagaWorker, ENV, FAV_ACTION),
-    [call(favItem, itemId, token), put(sucessfulFavItemAction(favItemResp, itemId, user))],
+    [call(favItem, itemId, token), put(successfulFavItemAction(favItemResp, itemId, user))],
     'Collected call and put effects from saga'
   )
 })
