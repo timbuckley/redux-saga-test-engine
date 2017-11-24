@@ -5,16 +5,16 @@ Test your `redux-saga` generator functions with less pain.
 
 ## Contents
   - [Installation](#installation)
-  - [Usage](#usage)
+  - [Basic Usage](#basic-usage)
   - [Full Example](#full-example)
   - [API](#api)
   - [FAQ](#faq)
     - [Q: What's the deal with this?](#q-whats-the-deal-with-this)
+    - [Q: How to test saga that is expected to throw exception?](#how-to-test-saga-that-is-expected-to-throw-exception)
     - [Q: Why not just use redux-saga-test?](#q-why-not-just-use-redux-saga-test)
     - [Q: Why not just use redux-saga-test-plan?](#q-why-not-just-use-redux-saga-test-plan)
     - [Q: Why not just do it manually?](#q-why-not-just-do-it-manually-example)
     - [Q: Why not use a Map for the second argument (the envMapping)?](#q-why-not-use-a-map-for-the-second-argument-the-envmapping)
-    - [Q: How to test saga that is expected to throw exception?](#how-to-test-saga-that-is-expected-to-throw-exception)
     - [Q: I know a better way](#q-i-know-a-better-way)
   - [License](#license)
 
@@ -30,7 +30,7 @@ With `yarn`:
 yarn add redux-saga-test-engine --dev
 ```
 
-## Usage
+## Basic Usage
 
 ```js
 const { createSagaTestEngine } = require('redux-saga-test-engine')
@@ -163,7 +163,7 @@ const {
   throwError,
 
   // Helper method.
-  // When used as value in the mapping can return different values on each call,
+  // When used as value in the mapping, it can return different values on each call,
   // defined by passed generator function.
   stub,
 } = require('redux-saga-test-engine')
@@ -184,6 +184,41 @@ Therefore, the arguments to the engine provided is:
 3. Whatever other arguments should initialize the saga worker (optional).
 
 ...and the output is an array of `put(...)` effect objects as they occur.
+
+### Q: How to test saga that is expected to throw exception?
+**A**: In some cases is useful saga to throw exception, for example when is part of bigger composed saga chain. As this library is testing framework agnostic it should propagate saga exceptions up and this makes no longer possible to receive collected 'PUT's as function result. To solve this problem we can pass empty `collected` array as argument to `collectPuts` function and inspect his content after the test run. The second argument (the `envMapping`) can accept `options` object, see the following 'ava' test example:
+
+```js
+test('Example throwFavSagaWorker with throwError effect follows sad path', t => {
+  const FAV_ACTION = {
+    type: 'FAV_ITEM_REQUESTED',
+    payload: { itemId: 123 },
+  }
+
+  const mapping = [
+    [call(favItem, itemId, token), throwError('ERROR')],
+  ]
+
+  // empty array reference
+  const collected = []
+
+  const options = {
+    mapping,
+    collected,
+  }
+
+  // expect to throw exception
+  t.throws(() => {
+    collectPuts(throwFavSagaWorker, options, FAV_ACTION)
+  })
+
+  t.deepEqual(
+    collected,
+    [put(receivedFavItemErrorAction('ERROR', 123))],
+    'Not happy path'
+  )
+})
+```
 
 ### Q: Why not just use [`redux-saga-test`](https://github.com/stoeffel/redux-saga-test)?
 **A**: Lets see how one uses it:
@@ -218,7 +253,6 @@ saga
   .isDone(); // assert that the saga is finished
 ```
 Again, annoyingly needs to handle the `next` manually, passing in the next value. Depending on exact ordering is a drag. So is manually inserting the generated value into the next `next`. Not recommended, would not test with again.
-
 
 ### Q: Why not just do it manually ([example](http://instea.sk/2016/09/testing-side-effects-using-redux-saga/))?
 **A**: Sure, if you want. It's just tedious and brittle for the same reasons mentioned in the previous two questions.
@@ -266,41 +300,6 @@ it('should cancel login task', () => {
 _**NOTE**: The collector functions now accept a `Map` as well as a nested array. But it isn't actually helpful, as described below._
 
 Maps only work if the key is referencing the identical object (ie `a === b`), even if their values are the same (ie `deepEqual(a, b)`). Thus a corresponding `select(...)` value, for example, would not be found merely by using `envMap.get(select(...))`. Instead, the keys must be traversed though - and so it's no more helpful to use a Map than a simple nested Array.
-
-### Q: How to test saga that is expected to throw exception?
-**A**: In some cases is useful saga to throw exception, for example when is part of bigger composed saga chain. As this library is testing framework agnostic it should propagate saga exceptions up and this makes no longer possible to receive collected 'PUT's as function result. To solve this problem we can pass empty `collected` array as argument to `collectPuts` function and inspect his content after the test run. The second argument (the `envMapping`) can accept `options` object, see the following 'ava' test example:
-
-```js
-test('Example throwFavSagaWorker with throwError effect follows sad path', t => {
-  const FAV_ACTION = {
-    type: 'FAV_ITEM_REQUESTED',
-    payload: { itemId: 123 },
-  }
-
-  const mapping = [
-    [call(favItem, itemId, token), throwError('ERROR')],
-  ]
-
-  // empty array reference
-  const collected = []
-
-  const options = {
-    mapping,
-    collected,
-  }
-
-  // expect to throw exception
-  t.throws(() => {
-    collectPuts(throwFavSagaWorker, options, FAV_ACTION)
-  })
-
-  t.deepEqual(
-    collected,
-    [put(receivedFavItemErrorAction('ERROR', 123))],
-    'Not happy path'
-  )
-})
-```
 
 ### Q: I know a better way.
 **A**: Awesome, please show us!
