@@ -47,8 +47,8 @@ const actualEffects = collectEffects(
   // it needs to be told what to yield. Worth noting here that the order does NOT
   // matter, as long as you don't have duplicate keys.
   [
-    [select(getPuppy), {barks: true, cute: 'Definitely'}],
-    [call(API.doWeLovePuppies), {answer: 'Of course we do!'}]
+    [select(getPuppy), { barks: true, cute: 'Definitely' }],
+    [call(API.doWeLovePuppies), { answer: 'Of course we do!' }]
   ],
 
   // Optional. All remaining arguments are given direct arguments to `sagaToTest` itself.
@@ -186,7 +186,7 @@ Therefore, the arguments to the engine provided is:
 ...and the output is an array of `put(...)` effect objects as they occur.
 
 ### Q: How to test saga that is expected to throw exception?
-**A**: In some cases is useful saga to throw exception, for example when is part of bigger composed saga chain. As this library is testing framework agnostic it should propagate saga exceptions up and this makes no longer possible to receive collected 'PUT's as function result. To solve this problem we can pass empty `collected` array as argument to `collectPuts` function and inspect his content after the test run. The second argument (the `envMapping`) can accept `options` object, see the following 'ava' test example:
+**A**: In some cases is useful saga to throw exceptions, for example when it is part of bigger composed saga chain. As this library is testing framework agnostic it should propagate saga exceptions up and this makes it no longer possible to receive collected 'PUT's as function result. To solve this problem we can pass empty `collected` array as argument to `collectPuts` function and inspect the content after the test run. The second argument (the `envMapping`) can accept `options` object, see the following `ava` test example:
 
 ```js
 test('Example throwFavSagaWorker with throwError effect follows sad path', t => {
