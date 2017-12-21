@@ -11,7 +11,7 @@ Test your `redux-saga` generator functions with less pain.
   - [API](#api)
   - [FAQ](#faq)
     - [Q: What's the deal with this?](#q-whats-the-deal-with-this)
-    - [Q: How to test saga that is expected to throw exception?](#how-to-test-saga-that-is-expected-to-throw-exception)
+    - [Q: How to test saga that is expected to throw exceptions?](#q-how-to-test-saga-that-is-expected-to-throw-exceptions)
     - [Q: Why not just use redux-saga-test?](#q-why-not-just-use-redux-saga-test)
     - [Q: Why not just use redux-saga-test-plan?](#q-why-not-just-use-redux-saga-test-plan)
     - [Q: Why not just do it manually?](#q-why-not-just-do-it-manually-example)
@@ -244,7 +244,7 @@ Therefore, the arguments to the engine provided is:
 
 ...and the output is an array of `put(...)` effect objects as they occur.
 
-### Q: How to test saga that is expected to throw exception?
+### Q: How to test saga that is expected to throw exceptions?
 **A**: In some cases is useful saga to throw exceptions, for example when it is part of bigger composed saga chain. As this library is testing framework agnostic it should propagate saga exceptions up and this makes it no longer possible to receive collected 'PUT's as function result. To solve this problem we can pass empty `collected` array as argument to `collectPuts` function and inspect the content after the test run. The second argument (the `envMapping`) can accept `options` object, see the following `ava` test example:
 
 ```js
