@@ -6,6 +6,7 @@ Test your `redux-saga` generator functions with less pain.
 ## Contents
   - [Installation](#installation)
   - [Basic Usage](#basic-usage)
+  - [Simple Example](#simple-example)
   - [Full Example](#full-example)
   - [API](#api)
   - [FAQ](#faq)
@@ -63,12 +64,70 @@ actualEffects
 //   put(hugPuppy(puppy))
 // ]
 ```
+## Simple Example
+
+```js
+// favSaga.js
+function* favSagaWorker(action) {
+  const { itemId } = action.payload
+  const { token, user } = yield select(getGlobalState)
+
+  try {
+    const response = yield call(favItem, itemId, token)
+    const json = yield response.json()
+    yield put(successfulFavItemAction(json, itemId, user))
+  } catch (e) {
+    yield put(receivedFavItemErrorAction(e, itemId))
+  }
+}
+```
+
+```js
+// favSaga.spec.js
+const test = require('ava')
+const { collectPuts } = require('redux-saga-test-engine')
+const {
+  favSagaWorker,
+  getGlobalState,
+  favItem,
+  successfulFavItemAction,
+} = require('../sagas')
+
+const { select, call, put } = require('redux-saga/effects')
+
+
+test('Example favSagaWorker with happy path works', t => {
+  const itemId = '123'
+  const token = '456'
+  const user = { id: '321' }
+
+  const favItemResp = 'The favItem JSON response'
+  const favItemRespObj = { json: () => favItemResp }
+
+  const FAV_ACTION = {
+    type: 'FAV_ITEM_REQUESTED',
+    payload: { itemId },
+  }
+
+  const ENV = [
+    [select(getGlobalState), { user, token }],
+    [call(favItem, itemId, token), favItemRespObj],
+    [favItemResp, favItemResp],
+  ]
+
+  t.deepEqual(
+    sagaTestEngine(favSagaWorker, ENV, FAV_ACTION),
+    [put(successfulFavItemAction(favItemResp, itemId, user))],
+    'Happy path'
+  )
+})
+```
 
 
 ## Full Example
 
 ```js
-// favSaga.js
+// retryFavSagaWorker.js
 function* retryFavSagaWorker(action) {
   const { itemId } = action.payload
   const { token, user } = yield select(getGlobalState)
@@ -89,7 +148,7 @@ function* retryFavSagaWorker(action) {
 ```
 
 ```js
-// favSaga.spec.js
+// retryFavSagaWorker.spec.js
 const test = require('ava')
 const { collectPuts, stub, throwError } = require('redux-saga-test-engine')
 const {
