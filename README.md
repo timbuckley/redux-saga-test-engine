@@ -1,5 +1,6 @@
 # Redux Saga Test Engine
-[![npm](https://badge.fury.io/js/redux-saga-test-engine.svg)](https://badge.fury.io/js/redux-saga-test-engine) ![Circle CI Status Shield](https://circleci.com/gh/DNAinfo/redux-saga-test-engine.png?style=shield&circle-token=2aa98ed43cdd0fcf890f955d7e203e663edba01c)
+[![npm](https://badge.fury.io/js/redux-saga-test-engine.svg)](https://badge.fury.io/js/redux-saga-test-engine) [![CircleCI](https://circleci.com/gh/timbuckley/redux-saga-test-engine.svg?style=svg)](https://circleci.com/gh/timbuckley/redux-saga-test-engine)
+
 
 Test your `redux-saga` generator functions with less pain.
 
