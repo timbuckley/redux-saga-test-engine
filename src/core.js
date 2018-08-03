@@ -45,22 +45,32 @@ function assert(condition, message) {
 
 // Returns value in mapping corresponding to matching searchVal key.
 function getNextVal(searchVal, mapping) {
+  let found = false
   let value
   if (isMap(mapping)) {
     for (let [key, val] of mapping.entries()) {
       if (deepEqual(key, searchVal)) {
+        found = true
         value = val
         break
       }
     }
   } else {
-    value = (mapping.find(keyVal => deepEqual(keyVal[0], searchVal)) || [])[1]
+    const emptyArray = []
+    const match = mapping.find(keyVal => deepEqual(keyVal[0], searchVal)) || emptyArray
+    if (match !== emptyArray) {
+      found = true
+    }
+    value = match[1]
   }
 
   if (typeof value === 'function') {
-    return value()
+    return {
+      found,
+      nextVal: value(),
+    }
   }
-  return value
+  return found ? { found, nextVal: value } : { found }
 }
 
 // Used to stringify yielded values. Output includes functions
@@ -125,13 +135,13 @@ function sagaTestEngine(effects, genFunc, opts, ...initialArgs) {
   let counter = 0
 
   while (!isDone) {
-    const nextVal = getNextVal(val, mapping)
+    const { found, nextVal } = getNextVal(val, mapping)
     const throwError = shouldThrowError(nextVal)
     let genResult
 
     // Yielded value must appear in mapping, or be a PUT Effect.
     const isFirstLoop = counter === 0
-    const nextValFound = nextVal !== undefined
+    const nextValFound = found
     const yieldedUndefined = val === undefined
     const yieldedEffectShouldBeCollected = isEffect(val, effects) || isNestedEffect(val, effects)
     assert(
