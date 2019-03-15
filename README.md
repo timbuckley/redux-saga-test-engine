@@ -83,7 +83,7 @@ function* retryFavSagaWorker(action) {
       break
     } catch (e) {
       yield put(receivedFavItemErrorAction(e, itemId))
-      yield call(delay, 2000)
+      yield delay(2000)
     }
   }
 }
@@ -126,7 +126,7 @@ test('retryFavSagaWorker', t => {
       yield favItemRespObjFail
       yield favItemRespObj
     })],
-    [call(delay, 2000), '__elapsed__']
+    [delay(2000), '__elapsed__']
   ]
 
   const actual = collectPuts((retryFavSagaWorker), ENV, FAV_ACTION)

@@ -1,7 +1,6 @@
 'use strict'
 
-const { delay } = require('redux-saga')
-const { select, call, put } = require('redux-saga/effects')
+const { select, call, put, delay } = require('redux-saga/effects')
 // ------------ Example ------------
 
 const getGlobalState = () => ({
@@ -55,7 +54,7 @@ function* retryFavSagaWorker(action) {
       break
     } catch (e) {
       yield put(receivedFavItemErrorAction(e, itemId))
-      yield call(delay, 2000)
+      yield delay(2000)
     }
   }
 }
