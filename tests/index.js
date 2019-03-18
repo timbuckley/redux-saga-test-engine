@@ -27,10 +27,11 @@ const {
   loadingFavItemAction,
 } = require('../sagas')
 
-const { delay } = require('redux-saga')
-const { select, call, put } = require('redux-saga/effects')
+const { select, call, put, delay } = require('redux-saga/effects')
 
 const sagaTestEngine = collectPuts
+
+const ioKey = '@@redux-saga/IO'
 
 test('isEffect correctly identifies a PUT Saga Effect', t => {
   t.false(isEffect())
@@ -40,10 +41,10 @@ test('isEffect correctly identifies a PUT Saga Effect', t => {
   t.false(isEffect(select, ['PUT']))
   t.false(isEffect(call(() => 'call'), ['PUT']))
   t.false(isEffect(select(() => 'select'), ['PUT']))
-  t.false(isEffect({ CALL: 'something' }, ['PUT']))
+  t.false(isEffect({ [ioKey]: true, type: 'CALL' }, ['PUT']))
 
   t.true(isEffect(put({}), ['PUT']))
-  t.true(isEffect({ PUT: 'something' }, ['PUT']))
+  t.true(isEffect({ [ioKey]: true, type: 'PUT' }, ['PUT']))
 })
 
 test('isEffect correctly identifies a CALL or PUT Saga Effect', t => {
@@ -51,12 +52,12 @@ test('isEffect correctly identifies a CALL or PUT Saga Effect', t => {
   t.false(isEffect(call, ['PUT', 'CALL']))
   t.false(isEffect(select, ['PUT', 'CALL']))
   t.false(isEffect(select(() => 'select'), ['PUT', 'CALL']))
-  t.false(isEffect({ CALL: 'something' }, ['PUT']))
+  t.false(isEffect({ [ioKey]: true, type: 'CALL' }, ['PUT']))
 
   t.true(isEffect(call(() => 'call'), ['PUT', 'CALL']))
   t.true(isEffect(put({}), ['PUT', 'CALL']))
-  t.true(isEffect({ PUT: 'something' }, ['PUT', 'CALL']))
-  t.true(isEffect({ CALL: 'something' }, ['PUT', 'CALL']))
+  t.true(isEffect({ [ioKey]: true, type: 'PUT' }, ['PUT', 'CALL']))
+  t.true(isEffect({ [ioKey]: true, type: 'CALL' }, ['PUT', 'CALL']))
 })
 
 test('isNestedEffect correctly identifies an array of PUT Saga Effects', t => {
@@ -68,11 +69,11 @@ test('isNestedEffect correctly identifies an array of PUT Saga Effects', t => {
   t.false(isNestedEffect(select, ['PUT']))
   t.false(isNestedEffect(call(() => 'call'), ['PUT']))
   t.false(isNestedEffect(select(() => 'select'), ['PUT']))
-  t.false(isNestedEffect({ CALL: 'something' }, ['PUT']))
+  t.false(isNestedEffect({ [ioKey]: true, type: 'CALL' }, ['PUT']))
   t.false(isNestedEffect(put({}), ['PUT']))
-  t.false(isNestedEffect({ PUT: 'something' }), ['PUT'])
+  t.false(isNestedEffect({ [ioKey]: true, type: 'PUT' }), ['PUT'])
 
-  t.true(isNestedEffect([{ PUT: 'something' }], ['PUT']))
+  t.true(isNestedEffect([{ [ioKey]: true, type: 'PUT' }], ['PUT']))
   t.true(isNestedEffect([put({})], ['PUT']))
   t.true(isNestedEffect([put({}), put({}), put({})], ['PUT']))
 
@@ -89,14 +90,14 @@ test('isNestedEffect correctly identifies an array of PUT or CALL Saga Effects',
   t.false(isNestedEffect(select, ['PUT', 'CALL']))
   t.false(isNestedEffect(call(() => 'call'), ['PUT', 'CALL']))
   t.false(isNestedEffect(select(() => 'select'), ['PUT', 'CALL']))
-  t.false(isNestedEffect({ CALL: 'something' }, ['PUT', 'CALL']))
+  t.false(isNestedEffect({ [ioKey]: true, type: 'CALL' }, ['PUT', 'CALL']))
   t.false(isNestedEffect(put({}), ['PUT', 'CALL']))
-  t.false(isNestedEffect({ PUT: 'something' }), ['PUT', 'CALL'])
+  t.false(isNestedEffect({ [ioKey]: true, type: 'PUT' }), ['PUT', 'CALL'])
 
-  t.true(isNestedEffect([{ PUT: 'something' }], ['PUT', 'CALL']))
+  t.true(isNestedEffect([{ [ioKey]: true, type: 'PUT' }], ['PUT', 'CALL']))
   t.true(isNestedEffect([put({})], ['PUT', 'CALL']))
   t.true(isNestedEffect([put({}), put({}), put({})], ['PUT', 'CALL']))
-  t.true(isNestedEffect([{ CALL: 'something' }], ['PUT', 'CALL']))
+  t.true(isNestedEffect([{ [ioKey]: true, type: 'CALL' }], ['PUT', 'CALL']))
   t.true(isNestedEffect([call(() => 1)], ['PUT', 'CALL']))
   t.true(isNestedEffect([call(() => 1), put({}), put({})], ['PUT', 'CALL']))
   t.true(isNestedEffect([put({}), call(() => 1), put({})], ['PUT', 'CALL']))
@@ -129,12 +130,12 @@ test('shouldThrowError correctly identifies a throw effect', t => {
   t.false(shouldThrowError(select))
   t.false(shouldThrowError(call(() => 'call')))
   t.false(shouldThrowError(select(() => 'select')))
-  t.false(shouldThrowError({ CALL: 'something' }))
+  t.false(shouldThrowError({ [ioKey]: true, type: 'CALL' }))
   t.false(shouldThrowError(put({})))
-  t.false(shouldThrowError({ PUT: 'something' }))
+  t.false(shouldThrowError({ [ioKey]: true, type: 'PUT' }))
 
   t.true(shouldThrowError(throwError('error')))
-  t.true(shouldThrowError({ '@@redux-saga-test-engine/ERROR': 'something' }))
+  t.true(shouldThrowError({ [ioKey]: true, type: '@@redux-saga-test-engine/ERROR' }))
 })
 
 test('getNextVal', t => {
@@ -452,12 +453,12 @@ test('Endless cycle saga', t => {
     // eslint-disable-next-line no-constant-condition
     while (true) {
       yield put({ type: 'HEARTBEAT' })
-      yield call(delay, 1000)
+      yield delay(1000)
     }
   }
 
   const options = {
-    mapping: [[call(delay, 1000), '__elapsed__']],
+    mapping: [[delay(1000), '__elapsed__']],
     collected: [],
     maxSteps: 100,
   }
@@ -523,7 +524,7 @@ test('Example retryFavSagaWorker works', t => {
         yield favItemRespObj
       }),
     ],
-    [call(delay, 2000), '__elapsed__'],
+    [delay(2000), '__elapsed__'],
     [favItemResp, favItemResp],
   ]
 

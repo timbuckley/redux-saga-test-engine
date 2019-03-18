@@ -3,8 +3,10 @@ const deepEqual = require('deep-equal')
 
 const bool = o => !!o
 
+const ioKey = '@@redux-saga/IO'
+
 const isEffect = (obj, effects = []) =>
-  bool(obj && Object.keys(obj).some(key => effects.includes(key)))
+  bool(obj && obj[ioKey] === true && effects.includes(obj.type))
 
 const isNestedEffect = (arr, effects = []) =>
   bool(arr && arr.every && arr.length > 0 && arr.every(element => isEffect(element, effects)))
@@ -20,10 +22,10 @@ const isMap = m => bool(Object.prototype.toString.call(m) === '[object Map]')
 
 const throwErrorKey = '@@redux-saga-test-engine/ERROR'
 
-// check if consumer is yielding our effect to immediatly cause the generator function to throw an error
-const shouldThrowError = obj => bool(obj && Object.keys(obj).includes(throwErrorKey))
+// check if consumer is yielding our effect to immediately cause the generator function to throw an error
+const shouldThrowError = obj => isEffect(obj, [throwErrorKey])
 
-const throwError = message => ({ [throwErrorKey]: message })
+const throwError = message => ({ [ioKey]: true, type: throwErrorKey, payload: message })
 
 // Lifted from https://github.com/tj/co/blob/717b043371ba057cb7a4a2a4e47120d598116ed7/index.js#L221
 function isGeneratorFunction(obj) {
@@ -140,7 +142,7 @@ function sagaTestEngine(effects, genFunc, opts, ...initialArgs) {
     )
 
     if (throwError) {
-      genResult = gen.throw(nextVal[throwErrorKey] || 'ERROR')
+      genResult = gen.throw(nextVal.payload || 'ERROR')
     } else {
       genResult = gen.next(nextVal)
     }
