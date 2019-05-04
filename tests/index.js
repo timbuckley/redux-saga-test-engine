@@ -140,34 +140,36 @@ test('shouldThrowError correctly identifies a throw effect', t => {
 
 test('getNextVal', t => {
   // Nested Array
-  t.is(2, getNextVal(1, [[1, 2]]))
-  t.is(2, getNextVal(1, [[1, 2], [1, 3]]))
-  t.is(4, getNextVal(3, [[1, 2], [3, 4]]))
-  t.is(
-    'val',
+  t.deepEqual({ found: true, nextVal: 2 }, getNextVal(1, [[1, 2]]))
+  t.deepEqual({ found: true, nextVal: 2 }, getNextVal(1, [[1, 2], [1, 3]]))
+  t.deepEqual({ found: true, nextVal: 4 }, getNextVal(3, [[1, 2], [3, 4]]))
+  t.deepEqual(
+    { found: true, nextVal: 'val' },
     getNextVal({ a: { b: { c: 1 } } }, [[{ a: { b: { c: 1 } } }, 'val']]),
     'Handled deeply-nested objects in arrays'
   )
-  t.is(
-    undefined,
+  t.deepEqual(
+    { found: false },
     getNextVal({ a: { b: { c: 2 } } }, [[{ a: { b: { c: 1 } } }, 'val']]),
     'Handled deeply-nested objects in arrays part 2'
   )
+  t.deepEqual({ found: true, nextVal: undefined }, getNextVal(1, [[1, undefined]]))
 
   // Nested Array with simple stubs
-  t.is(2, getNextVal(1, [[1, () => 2]]))
-  t.is(2, getNextVal(1, [[1, () => 2], [1, () => 3]]))
-  t.is(4, getNextVal(3, [[1, () => 2], [3, () => 4]]))
-  t.is(
-    'val',
+  t.deepEqual({ found: true, nextVal: 2 }, getNextVal(1, [[1, () => 2]]))
+  t.deepEqual({ found: true, nextVal: 2 }, getNextVal(1, [[1, () => 2], [1, () => 3]]))
+  t.deepEqual({ found: true, nextVal: 4 }, getNextVal(3, [[1, () => 2], [3, () => 4]]))
+  t.deepEqual(
+    { found: true, nextVal: 'val' },
     getNextVal({ a: { b: { c: 1 } } }, [[{ a: { b: { c: 1 } } }, () => 'val']]),
     'Handled deeply-nested objects in arrays with simple stubs'
   )
-  t.is(
-    undefined,
+  t.deepEqual(
+    { found: false },
     getNextVal({ a: { b: { c: 2 } } }, [[{ a: { b: { c: 1 } } }, () => 'val']]),
     'Handled deeply-nested objects in arrays part 2 with simple stubs'
   )
+  t.deepEqual({ found: true, nextVal: undefined }, getNextVal(1, [[1, () => undefined]]))
 
   // Nested Array with generator stubs
   const stub1 = stub(function*() {
@@ -179,45 +181,59 @@ test('getNextVal', t => {
     }
   })
 
-  t.is(2, getNextVal(1, [[1, stub1]]), 'Handle generator stub call 1')
-  t.is(3, getNextVal(1, [[1, stub1]]), 'Handle generator stub call 2')
-  t.is(4, getNextVal(1, [[1, stub1]]), 'Handle generator stub call 3')
+  t.deepEqual(
+    { found: true, nextVal: 2 },
+    getNextVal(1, [[1, stub1]]),
+    'Handle generator stub call 1'
+  )
+  t.deepEqual(
+    { found: true, nextVal: 3 },
+    getNextVal(1, [[1, stub1]]),
+    'Handle generator stub call 2'
+  )
+  t.deepEqual(
+    { found: true, nextVal: 4 },
+    getNextVal(1, [[1, stub1]]),
+    'Handle generator stub call 3'
+  )
 
   // Map
-  t.is(2, getNextVal(1, new Map([[1, 2]])))
-  t.is(4, getNextVal(3, new Map([[1, 2], [3, 4]])))
-  t.is(
-    'val',
+  t.deepEqual({ found: true, nextVal: 2 }, getNextVal(1, new Map([[1, 2]])))
+  t.deepEqual({ found: true, nextVal: 4 }, getNextVal(3, new Map([[1, 2], [3, 4]])))
+  t.deepEqual(
+    { found: true, nextVal: 'val' },
     getNextVal({ a: { b: { c: 1 } } }, new Map([[{ a: { b: { c: 1 } } }, 'val']])),
     'Handled deeply-nested objects in Map'
   )
-  t.is(
-    undefined,
+  t.deepEqual(
+    { found: false },
     getNextVal({ a: { b: { c: 2 } } }, new Map([[{ a: { b: { c: 1 } } }, 'val']])),
     'Handled deeply-nested objects in Map part 2'
   )
+  t.deepEqual({ found: true, nextVal: undefined }, getNextVal(1, new Map([[1, undefined]])))
 
   // Map with simple stubs
-  t.is(2, getNextVal(1, new Map([[1, () => 2]])))
-  t.is(4, getNextVal(3, new Map([[1, () => 2], [3, () => 4]])))
-  t.is(
-    'val',
+  t.deepEqual({ found: true, nextVal: 2 }, getNextVal(1, new Map([[1, () => 2]])))
+  t.deepEqual({ found: true, nextVal: 4 }, getNextVal(3, new Map([[1, () => 2], [3, () => 4]])))
+  t.deepEqual(
+    { found: true, nextVal: 'val' },
     getNextVal({ a: { b: { c: 1 } } }, new Map([[{ a: { b: { c: 1 } } }, () => 'val']])),
     'Handled deeply-nested objects in Map with simple stubs'
   )
-  t.is(
-    undefined,
+  t.deepEqual(
+    { found: false },
     getNextVal({ a: { b: { c: 2 } } }, new Map([[{ a: { b: { c: 1 } } }, () => 'val']])),
     'Handled deeply-nested objects in Map part 2 with simple stubs'
   )
+  t.deepEqual({ found: true, nextVal: undefined }, getNextVal(1, new Map([[1, () => undefined]])))
 
   // Handles value not found.
-  t.is(undefined, getNextVal(100, []))
-  t.is(undefined, getNextVal(100, new Map([])))
-  t.is(undefined, getNextVal(100, [[1, 2]]))
-  t.is(undefined, getNextVal(100, new Map([[1, 2]])))
-  t.is(undefined, getNextVal(undefined, []))
-  t.is(undefined, getNextVal(undefined, new Map([])))
+  t.deepEqual({ found: false }, getNextVal(100, []))
+  t.deepEqual({ found: false }, getNextVal(100, new Map([])))
+  t.deepEqual({ found: false }, getNextVal(100, [[1, 2]]))
+  t.deepEqual({ found: false }, getNextVal(100, new Map([[1, 2]])))
+  t.deepEqual({ found: false }, getNextVal(undefined, []))
+  t.deepEqual({ found: false }, getNextVal(undefined, new Map([])))
 })
 
 test('sagaTestEngine throws under bad conditions', t => {
