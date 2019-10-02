@@ -57,7 +57,7 @@ function getNextVal(searchVal, mapping) {
     value = (mapping.find(keyVal => deepEqual(keyVal[0], searchVal)) || [])[1]
   }
 
-  if (typeof value === 'function') {
+  if (typeof value === 'function' && value._isReduxSagaTestEngineStub) {
     return value()
   }
   return value
@@ -84,9 +84,13 @@ function stringifyVal(val) {
 const stub = (genFunc, ...args) => {
   if (isGeneratorFunction(genFunc)) {
     const gen = genFunc(...args)
-    return () => gen.next().value
+    const stubFunc = () => gen.next().value
+    stubFunc._isReduxSagaTestEngineStub = true
+    return stubFunc
   } else {
-    return () => genFunc(...args)
+    const stubFunc = () => genFunc(...args)
+    stubFunc._isReduxSagaTestEngineStub = true
+    return stubFunc
   }
 }
 
