@@ -4,6 +4,9 @@
   "description": "Redux saga test helper",
   "main": "build/index.js",
   "repository": "DNAinfo/redux-saga-test-engine",
+  "engines": {
+    "node": ">=10.18.0 <11 || >=12.14.0 <13 || >=13.5.0"
+  },
   "scripts": {
     "test": "ava tests/",
     "test:watch": "yarn test -- --watch",
@@ -30,7 +33,7 @@
     "deep-equal": "^1.0.1"
   },
   "devDependencies": {
-    "ava": "^0.18.2",
+    "ava": "^3.10.1",
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.3",
     "babel-eslint": "^7.2.3",
