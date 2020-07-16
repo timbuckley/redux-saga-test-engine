@@ -5,13 +5,12 @@
   "main": "build/index.js",
   "repository": "DNAinfo/redux-saga-test-engine",
   "scripts": {
-    "start": "npm install",
     "test": "ava tests/",
-    "test:watch": "npm test -- --watch",
+    "test:watch": "yarn test -- --watch",
     "lint": "eslint ./src ./tests",
     "build": "rimraf build && cross-env BABEL_ENV=es babel src -d build --ignore 'tests'",
     "prettier": "prettier --print-width 100 --tab-width 2 --use-tabs false --semi false --single-quote true --trailing-comma es5 --write \"{sagas,src,tests}/**/*.js\"",
-    "prepublish": "npm run build",
+    "prepublish": "yarn run build",
     "precommit": "lint-staged"
   },
   "lint-staged": {
