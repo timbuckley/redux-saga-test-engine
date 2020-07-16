@@ -154,13 +154,15 @@ test('getNextVal', t => {
     'Handled deeply-nested objects in arrays part 2'
   )
 
-  // Nested Array with simple stubs
-  t.is(2, getNextVal(1, [[1, () => 2]]))
-  t.is(2, getNextVal(1, [[1, () => 2], [1, () => 3]]))
-  t.is(4, getNextVal(3, [[1, () => 2], [3, () => 4]]))
+  const testFunction = () => 1
+
+  // Nested Array with returned functions
+  t.is(testFunction, getNextVal(1, [[1, testFunction]]))
+  t.is(testFunction, getNextVal(1, [[1, testFunction], [1, () => 3]]))
+  t.is(testFunction, getNextVal(3, [[1, () => 2], [3, testFunction]]))
   t.is(
-    'val',
-    getNextVal({ a: { b: { c: 1 } } }, [[{ a: { b: { c: 1 } } }, () => 'val']]),
+    testFunction,
+    getNextVal({ a: { b: { c: 1 } } }, [[{ a: { b: { c: 1 } } }, testFunction]]),
     'Handled deeply-nested objects in arrays with simple stubs'
   )
   t.is(
@@ -198,11 +200,11 @@ test('getNextVal', t => {
   )
 
   // Map with simple stubs
-  t.is(2, getNextVal(1, new Map([[1, () => 2]])))
-  t.is(4, getNextVal(3, new Map([[1, () => 2], [3, () => 4]])))
+  t.is(testFunction, getNextVal(1, new Map([[1, testFunction]])))
+  t.is(testFunction, getNextVal(3, new Map([[1, () => 2], [3, testFunction]])))
   t.is(
-    'val',
-    getNextVal({ a: { b: { c: 1 } } }, new Map([[{ a: { b: { c: 1 } } }, () => 'val']])),
+    testFunction,
+    getNextVal({ a: { b: { c: 1 } } }, new Map([[{ a: { b: { c: 1 } } }, testFunction]])),
     'Handled deeply-nested objects in Map with simple stubs'
   )
   t.is(
