@@ -1,5 +1,5 @@
 # Redux Saga Test Engine
-[![npm](https://badge.fury.io/js/redux-saga-test-engine.svg)](https://badge.fury.io/js/redux-saga-test-engine) [![CircleCI](https://circleci.com/gh/timbuckley/redux-saga-test-engine.svg?style=svg)](https://circleci.com/gh/timbuckley/redux-saga-test-engine)
+[![npm](https://badge.fury.io/js/redux-saga-test-engine.svg)](https://badge.fury.io/js/redux-saga-test-engine) 
 ![Code scanning - action](https://github.com/timbuckley/redux-saga-test-engine/workflows/Code%20scanning%20-%20action/badge.svg)
 
 
